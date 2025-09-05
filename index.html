@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Roots of Renewal</title>
+<style>
+  body { font-family: sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 0; }
+  header { background: #228B22; color: white; padding: 10px; }
+  .resources { display: flex; justify-content: center; gap: 15px; margin: 10px 0; }
+  .pill { background: #fff; color: #228B22; padding: 6px 12px; border-radius: 20px; font-weight: bold; }
+  button { margin: 8px; padding: 10px 20px; font-size: 1em; border-radius: 6px; border: none; cursor: pointer; }
+  #scatterBtn { background: #32cd32; color: white; }
+  .shop button { background: #4682b4; color: white; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🌱 Roots of Renewal</h1>
+    <div class="resources">
+      <div class="pill">🌱 Seeds: <span id="seeds">0</span></div>
+      <div class="pill">🌿 Plants: <span id="plants">0</span></div>
+      <div class="pill">🌎 Env: <span id="env">1.0</span>x</div>
+    </div>
+  </header>
+
+  <main>
+    <button id="scatterBtn">Scatter Seeds 🌱 +1</button>
+    <div class="shop" id="shopBody"></div>
+  </main>
+
+<script>
+// --- Game State ---
+let state = {
+  seeds: 0,
+  plants: 0,
+  envQuality: 1.0 // environmental multiplier
+};
+
+// --- Button Actions ---
+function scatter() {
+  state.seeds += 1;
+  render();
+}
+
+function buyPlant() {
+  if (state.seeds >= 10) {
+    state.seeds -= 10;
+    state.plants += 1;
+    render();
+  } else {
+    alert("Not enough seeds to grow a plant!");
+  }
+}
+
+function improveEnvironment() {
+  if (state.seeds >= 50) {
+    state.seeds -= 50;
+    state.envQuality += 0.2;
+    render();
+  } else {
+    alert("Not enough seeds to improve environment!");
+  }
+}
+
+// --- Automatic Growth Loop ---
+setInterval(() => {
+  // Plants generate seeds over time
+  state.seeds += Math.floor(state.plants * state.envQuality);
+  render();
+}, 2000); // every 2 seconds
+
+// --- Render Function ---
+function render() {
+  document.getElementById("seeds").textContent = state.seeds;
+  document.getElementById("plants").textContent = state.plants;
+  document.getElementById("env").textContent = state.envQuality.toFixed(1);
+
+  // Simple shop
+  const shopBody = document.getElementById("shopBody");
+  shopBody.innerHTML = "";
+  const plantBtn = document.createElement("button");
+  plantBtn.textContent = "Grow Plant (10 seeds)";
+  plantBtn.onclick = buyPlant;
+  shopBody.appendChild(plantBtn);
+
+  const envBtn = document.createElement("button");
+  envBtn.textContent = "Improve Environment (50 seeds)";
+  envBtn.onclick = improveEnvironment;
+  shopBody.appendChild(envBtn);
+}
+
+// --- Init ---
+document.getElementById("scatterBtn").addEventListener("click", scatter);
+render();
+</script>
+</body>
+</html>
