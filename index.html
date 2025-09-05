@@ -15,6 +15,9 @@
   .shop button { background: #4682b4; color: white; display: block; margin: 6px auto; width: 90%; }
   #prestigeBtn { background: #8b0000; color: white; }
   #prestigeReport { background: #fff; padding: 15px; border: 2px solid #228B22; border-radius: 10px; margin: 15px auto; width: 90%; max-width: 500px; display: none; }
+  #journal { background: #fff8dc; border: 2px solid #deb887; border-radius: 10px; width: 90%; max-width: 600px; margin: 20px auto; padding: 10px; text-align: left; height: 200px; overflow-y: auto; }
+  #journal h3 { margin-top: 0; }
+  .entry { margin: 4px 0; font-size: 0.9em; }
 </style>
 </head>
 <body>
@@ -37,18 +40,22 @@
     <div class="shop" id="shopBody"></div>
     <button id="prestigeBtn">Rewild Land (Prestige)</button>
     <div id="prestigeReport"></div>
+    <div id="journal">
+      <h3>📓 Field Notes</h3>
+      <div id="entries"></div>
+    </div>
   </main>
 
 <script>
 // --- Game State ---
 let state = {
   seeds: 0,
-  plants: {},       // {name: count}
-  pollinators: {},  // {name: count}
+  plants: {},
+  pollinators: {},
   envQuality: 1.0,
   stewardship: 0,
   ecoKnowledge: 0,
-  restored: 0       // total sq ft restored
+  restored: 0
 };
 
 // --- Plant and Pollinator Data ---
@@ -60,12 +67,12 @@ const PLANTS = [
 ];
 
 const POLLINATORS = [
-  { name: "Monarch Butterfly", cost: 100, boost: 0.2, envReq: 1.5, host: "Butterfly Milkweed", food: "Prairie Blazing Star" },
-  { name: "Rusty Patched Bumblebee", cost: 200, boost: 0.4, envReq: 2.0, host: "Purple Coneflower", food: "Prairie Blazing Star" },
-  { name: "Hummingbird Clearwing Moth", cost: 300, boost: 0.6, envReq: 2.5, host: "Little Bluestem", food: "Butterfly Milkweed" }
+  { name: "Monarch Butterfly", boost: 0.2, envReq: 1.5, host: "Butterfly Milkweed", food: "Prairie Blazing Star" },
+  { name: "Rusty Patched Bumblebee", boost: 0.4, envReq: 2.0, host: "Purple Coneflower", food: "Prairie Blazing Star" },
+  { name: "Hummingbird Clearwing Moth", boost: 0.6, envReq: 2.5, host: "Little Bluestem", food: "Butterfly Milkweed" }
 ];
 
-// --- Milestone Comparisons ---
+// --- Milestones ---
 const LANDMARKS = [
   { size: 100, label: "a backyard garden" },
   { size: 1000, label: "a community park" },
@@ -74,53 +81,70 @@ const LANDMARKS = [
   { size: 1000000, label: "a national park" }
 ];
 
-// --- Core Actions ---
+// --- Journal ---
+function logPlanting(plant) {
+  logEntry(`🌱 Planted ${plant.name}; it sways gently in the breeze and may soon attract pollinators.`);
+}
+
+function logEnvironmentImprovement() {
+  logEntry(`🌎 The land feels renewed; the soil and surrounding flora thrive a little more each day.`);
+}
+
+function logPollinatorArrival(pol) {
+  logEntry(`🐝 ${pol.name} appears, drawn by the ${pol.host} and ${pol.food}; its presence signals a flourishing habitat.`);
+}
+
+function logPrestige(addedRestored, comparison) {
+  logEntry(`📖 Rewilding complete! This run restored ${addedRestored.toLocaleString()} sq ft. Total restored: ${state.restored.toLocaleString()} sq ft — roughly the size of ${comparison}. Nature celebrates your stewardship.`);
+}
+
+// --- Actions ---
 function scatter() { state.seeds += 1; render(); }
 
 function buyPlant(plant) {
   if (state.seeds >= plant.cost) {
     state.seeds -= plant.cost;
     state.plants[plant.name] = (state.plants[plant.name] || 0) + 1;
+    logEntry(`🌱 Planted ${plant.name}.`);
     render();
   }
-}
-
-function buyPollinator(pol) {
-  if (state.seeds >= pol.cost && canUnlockPollinator(pol)) {
-    state.seeds -= pol.cost;
-    state.pollinators[pol.name] = (state.pollinators[pol.name] || 0) + 1;
-    render();
-  }
-}
-
-function canUnlockPollinator(pol) {
-  return state.envQuality >= pol.envReq &&
-    (state.plants[pol.host] || 0) > 0 &&
-    (state.plants[pol.food] || 0) > 0;
 }
 
 function improveEnvironment() {
   if (state.stewardship >= 20) {
     state.stewardship -= 20;
     state.envQuality += 0.2;
+    logEntry(`🌎 Environment improved. Quality now ${state.envQuality.toFixed(1)}x.`);
     render();
   }
 }
 
+// --- Pollinator Arrival ---
+function checkPollinators() {
+  POLLINATORS.forEach(pol => {
+    if (!state.pollinators[pol.name]) {
+      let envOk = state.envQuality >= pol.envReq;
+      let hostOk = (state.plants[pol.host] || 0) > 0;
+      let foodOk = (state.plants[pol.food] || 0) > 0;
+      if (envOk && hostOk && foodOk) {
+        state.pollinators[pol.name] = true;
+        logEntry(`🐝 ${pol.name} arrived, attracted by ${pol.host} and ${pol.food}.`);
+      }
+    }
+  });
+}
+
 // --- Prestige ---
 function prestige() {
-  // Calculate restored square footage
   let addedRestored = Math.floor(state.stewardship * 2 + Object.values(state.plants).reduce((a,b)=>a+b,0) * 5);
   state.restored += addedRestored;
   state.ecoKnowledge += 1;
 
-  // Build comparison
   let comparison = LANDMARKS.reduce((acc, mark) => {
     if (state.restored >= mark.size) acc = mark.label;
     return acc;
   }, "a patch of wildflowers");
 
-  // Narrative report
   let report = `
     <h3>🌎 Rewilding Complete!</h3>
     <p>You restored <b>${addedRestored.toLocaleString()}</b> sq ft this run.</p>
@@ -130,18 +154,24 @@ function prestige() {
   document.getElementById("prestigeReport").innerHTML = report;
   document.getElementById("prestigeReport").style.display = "block";
 
-  // Reset state
+  logEntry(`📖 Rewilding complete: ${addedRestored.toLocaleString()} sq ft restored this run. +1 Eco Knowledge.`);
+
+  // Reset
   state.seeds = 0;
   state.plants = {};
   state.pollinators = {};
   state.envQuality = 1.0;
   state.stewardship = 0;
 
+  // Clear journal for new run
+  document.getElementById("entries").innerHTML = "";
   render();
 }
 
 // --- Growth Loop ---
 setInterval(() => {
+  checkPollinators();
+
   let plantSeedGain = 0;
   for (let plant of PLANTS) {
     const count = state.plants[plant.name] || 0;
@@ -151,9 +181,10 @@ setInterval(() => {
   let pollinatorBoost = 1;
   let totalPolls = 0;
   for (let pol of POLLINATORS) {
-    const count = state.pollinators[pol.name] || 0;
-    totalPolls += count;
-    pollinatorBoost += count * pol.boost;
+    if (state.pollinators[pol.name]) {
+      totalPolls += 1;
+      pollinatorBoost += pol.boost;
+    }
   }
 
   let uniquePlants = Object.keys(state.plants).filter(p => state.plants[p] > 0).length;
@@ -172,7 +203,7 @@ setInterval(() => {
 // --- Render ---
 function render() {
   const totalPlants = Object.values(state.plants).reduce((a,b)=>a+b,0);
-  const totalPolls = Object.values(state.pollinators).reduce((a,b)=>a+b,0);
+  const totalPolls = Object.keys(state.pollinators).filter(k => state.pollinators[k]).length;
   let uniquePlants = Object.keys(state.plants).filter(p => state.plants[p] > 0).length;
   let diversityMult = 1 + (uniquePlants - 1) * 0.1;
 
@@ -194,24 +225,20 @@ function render() {
     shopBody.appendChild(btn);
   });
 
-  shopBody.innerHTML += "<h3>Pollinator Habitat</h3>";
-  POLLINATORS.forEach(pol => {
-    const btn = document.createElement("button");
-    let label = `${pol.name} (${pol.cost} seeds) [Boost +${Math.round(pol.boost*100)}%]`;
-    if (!canUnlockPollinator(pol)) {
-      label += ` (Requires Env ${pol.envReq}, Host: ${pol.host}, Food: ${pol.food})`;
-      btn.disabled = true;
-    }
-    btn.textContent = label;
-    btn.onclick = () => buyPollinator(pol);
-    shopBody.appendChild(btn);
-  });
-
   shopBody.innerHTML += "<h3>Habitat Restoration</h3>";
   const envBtn = document.createElement("button");
   envBtn.textContent = `Improve Environment (+0.2) [20 Stewardship]`;
   envBtn.onclick = improveEnvironment;
   shopBody.appendChild(envBtn);
+
+  shopBody.innerHTML += "<h3>Pollinators</h3>";
+  POLLINATORS.forEach(pol => {
+    const status = state.pollinators[pol.name] ? "✅ Arrived" :
+      `❌ Needs Env ${pol.envReq}, Host: ${pol.host}, Food: ${pol.food}`;
+    const div = document.createElement("div");
+    div.textContent = `${pol.name}: ${status}`;
+    shopBody.appendChild(div);
+  });
 }
 
 // --- Init ---
