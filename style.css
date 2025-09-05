@@ -1,1 +1,82 @@
+/* Basic styling for the game */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f8ff;
+}
 
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.title {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.resources {
+  display: flex;
+  gap: 10px;
+}
+
+.pill {
+  background-color: #98fb98;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 1.2em;
+}
+
+.uiRow {
+  margin: 20px 0;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+button.scatter {
+  background-color: #32cd32;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+button.buy {
+  background-color: #4682b4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.shop {
+  margin: 20px 0;
+}
+
+.nav {
+  margin-top: 20px;
+}
+
+dialog {
+  padding: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: white;
+}
+
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #32cd32;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  display: none;
+}
