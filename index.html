@@ -172,7 +172,6 @@ function checkPollinators() {
       let foodOk = (state.plants[pol.food] || 0) > 0;
       if (envOk && hostOk && foodOk) {
         state.pollinators[pol.name] = true;
-        logEntry
         logEntry(`🐝 ${pol.name} arrives, drawn by the ${pol.host} and ${pol.food}; its presence signals a flourishing habitat.`);
       }
     }
