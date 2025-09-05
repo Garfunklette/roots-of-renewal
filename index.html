@@ -31,16 +31,61 @@
   </div>
 </div>
 
-<dialog id="journalModal">...</dialog>
-<dialog id="menuModal">...</dialog>
+<dialog id="journalModal">
+  <div id="journalBody"></div>
+  <button id="closeJournal">Close</button>
+</dialog>
+
+<dialog id="menuModal">
+  <button id="prestigeBtn" class="buy">Prestige</button>
+  <button id="saveBtn" class="buy">Save</button>
+  <button id="resetBtn" class="buy">Reset</button>
+  <button id="closeMenu">Close</button>
+</dialog>
+
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+<!-- Load core game files in order -->
 <script src="js/gameState.js"></script>
 <script src="js/plants.js"></script>
 <script src="js/pollinators.js"></script>
 <script src="js/mechanics.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
+
+<script>
+// Ensure DOM elements exist before binding events
+window.addEventListener('load', () => {
+    // Scatter button
+    const scatterBtn = document.getElementById('scatterBtn');
+    if(scatterBtn) scatterBtn.addEventListener('click', scatter);
+
+    // Journal modal
+    const journalModal = document.getElementById('journalModal');
+    document.getElementById('navJournal').addEventListener('click', () => { renderJournal(); journalModal.showModal(); });
+    document.getElementById('closeJournal').addEventListener('click', () => journalModal.close());
+
+    // Menu modal
+    const menuModal = document.getElementById('menuModal');
+    document.getElementById('navMenu').addEventListener('click', () => menuModal.showModal());
+    document.getElementById('closeMenu').addEventListener('click', () => menuModal.close());
+    document.getElementById('prestigeBtn').addEventListener('click', prestige);
+    document.getElementById('saveBtn').addEventListener('click', () => { save(); toast('💾 Game saved'); });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        if(confirm('Are you sure you want to reset all progress?')) {
+            state = defaultState();
+            const scene = phaserGame.scene.keys['FieldScene'];
+            if(scene) scene.updatePlantsFromState();
+            renderAll();
+            save();
+        }
+    });
+
+    // Initial render
+    renderAll();
+});
+</script>
 </body>
 </html>
