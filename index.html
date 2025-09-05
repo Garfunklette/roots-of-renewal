@@ -69,7 +69,50 @@ const POLLINATORS = [
   { name: "Rusty Patched Bumblebee", boost: 0.4, envReq: 2.0, host: "Purple Coneflower", food: "Prairie Blazing Star" },
   { name: "Hummingbird Clearwing Moth", boost: 0.6, envReq: 2.5, host: "Little Bluestem", food: "Butterfly Milkweed" }
 ];
+<!-- inside <script> after state, PLANTS, POLLINATORS definitions -->
 
+// --- Render Shop ---
+function renderShop() {
+  const shopBody = document.getElementById("shopBody");
+  shopBody.innerHTML = ""; // Clear previous content
+
+  // --- Plant Shop ---
+  const h = document.createElement("h3");
+  h.textContent = "Plant Shop";
+  shopBody.appendChild(h);
+
+  PLANTS.forEach(plant => {
+    const btn = document.createElement("button");
+    btn.textContent = `Buy ${plant.name} (${plant.cost} seeds) [+${plant.rate}/tick]`;
+    btn.addEventListener("click", () => buyPlant(plant));
+    shopBody.appendChild(btn);
+  });
+
+  // --- Habitat Restoration ---
+  const h2 = document.createElement("h3");
+  h2.textContent = "Habitat Restoration";
+  shopBody.appendChild(h2);
+
+  const envBtn = document.createElement("button");
+  envBtn.textContent = "Improve Environment (+0.2) [20 Stewardship]";
+  envBtn.addEventListener("click", improveEnvironment);
+  shopBody.appendChild(envBtn);
+
+  // --- Pollinator Status ---
+  const h3 = document.createElement("h3");
+  h3.textContent = "Pollinators";
+  shopBody.appendChild(h3);
+
+  POLLINATORS.forEach(pol => {
+    const div = document.createElement("div");
+    const status = state.pollinators[pol.name]
+      ? "✅ Arrived"
+      : `❌ Needs Env ${pol.envReq}, Host: ${pol.host}, Food: ${pol.food}`;
+    div.textContent = `${pol.name}: ${status}`;
+    shopBody.appendChild(div);
+  });
+  }
+  
 const LANDMARKS = [
   { size: 100, label: "a backyard garden" },
   { size: 1000, label: "a community park" },
@@ -196,17 +239,24 @@ function renderPlantCounts(){
 }
 
 // --- Render Pollinator Counts ---
-function renderPollinatorCounts(){
-  const div=document.getElementById("pollinatorCounts");
-  div.innerHTML="<h3>🐝 Pollinator Counts</h3>";
-  POLLINATORS.forEach(pol=>{
-    const present=state.pollinators[pol.name]?"1+":"0";
-    const d=document.createElement("div");
-    d.textContent=`${pol.name}: ${present}`;
-    d.style.color=POLLINATOR_COLORS[pol.name]||"#000";
-    d.style.fontWeight="bold";
-    div.appendChild(d);
-  });
+function render() {
+  const totalPlants = Object.values(state.plants).reduce((a,b)=>a+b,0);
+  const totalPolls = Object.keys(state.pollinators).filter(k=>state.pollinators[k]).length;
+  const uniquePlants = Object.keys(state.plants).filter(p=>state.plants[p]>0).length;
+  const diversityMult = 1 + (uniquePlants-1)*0.1;
+
+  document.getElementById("seeds").textContent = state.seeds;
+  document.getElementById("plants").textContent = totalPlants;
+  document.getElementById("pollinators").textContent = totalPolls;
+  document.getElementById("stewardship").textContent = Math.floor(state.stewardship);
+  document.getElementById("env").textContent = state.envQuality.toFixed(1);
+  document.getElementById("div").textContent = diversityMult.toFixed(1);
+  document.getElementById("eco").textContent = state.ecoKnowledge;
+  document.getElementById("restored").textContent = state.restored.toLocaleString();
+
+  renderPlantCounts();
+  renderPollinatorCounts();
+  renderShop();
 }
 
 // --- Main Render ---
