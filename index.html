@@ -7,11 +7,14 @@
 <style>
   body { font-family: sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 0; }
   header { background: #228B22; color: white; padding: 10px; }
-  .resources { display: flex; justify-content: center; gap: 15px; margin: 10px 0; }
+  .resources { display: flex; justify-content: center; gap: 15px; margin: 10px 0; flex-wrap: wrap; }
   .pill { background: #fff; color: #228B22; padding: 6px 12px; border-radius: 20px; font-weight: bold; }
-  button { margin: 8px; padding: 10px 20px; font-size: 1em; border-radius: 6px; border: none; cursor: pointer; }
+  button { margin: 6px; padding: 8px 16px; font-size: 1em; border-radius: 6px; border: none; cursor: pointer; }
   #scatterBtn { background: #32cd32; color: white; }
-  .shop button { background: #4682b4; color: white; }
+  .shop h3 { margin-top: 20px; }
+  .shop button { background: #4682b4; color: white; display: block; margin: 6px auto; width: 90%; }
+  #prestigeBtn { background: #8b0000; color: white; }
+  #prestigeReport { background: #fff; padding: 15px; border: 2px solid #228B22; border-radius: 10px; margin: 15px auto; width: 90%; max-width: 500px; display: none; }
 </style>
 </head>
 <body>
@@ -20,78 +23,200 @@
     <div class="resources">
       <div class="pill">🌱 Seeds: <span id="seeds">0</span></div>
       <div class="pill">🌿 Plants: <span id="plants">0</span></div>
+      <div class="pill">🐝 Pollinators: <span id="pollinators">0</span></div>
+      <div class="pill">🤲 Stewardship: <span id="stewardship">0</span></div>
       <div class="pill">🌎 Env: <span id="env">1.0</span>x</div>
+      <div class="pill">🧬 Diversity: <span id="div">1.0</span>x</div>
+      <div class="pill">📚 Eco Knowledge: <span id="eco">0</span>x</div>
+      <div class="pill">🏞️ Restored: <span id="restored">0</span> sq ft</div>
     </div>
   </header>
 
   <main>
     <button id="scatterBtn">Scatter Seeds 🌱 +1</button>
     <div class="shop" id="shopBody"></div>
+    <button id="prestigeBtn">Rewild Land (Prestige)</button>
+    <div id="prestigeReport"></div>
   </main>
 
 <script>
 // --- Game State ---
 let state = {
   seeds: 0,
-  plants: 0,
-  envQuality: 1.0 // environmental multiplier
+  plants: {},       // {name: count}
+  pollinators: {},  // {name: count}
+  envQuality: 1.0,
+  stewardship: 0,
+  ecoKnowledge: 0,
+  restored: 0       // total sq ft restored
 };
 
-// --- Button Actions ---
-function scatter() {
-  state.seeds += 1;
-  render();
+// --- Plant and Pollinator Data ---
+const PLANTS = [
+  { name: "Purple Coneflower", cost: 10, rate: 1 },
+  { name: "Butterfly Milkweed", cost: 30, rate: 3 },
+  { name: "Little Bluestem", cost: 60, rate: 5 },
+  { name: "Prairie Blazing Star", cost: 120, rate: 10 }
+];
+
+const POLLINATORS = [
+  { name: "Monarch Butterfly", cost: 100, boost: 0.2, envReq: 1.5, host: "Butterfly Milkweed", food: "Prairie Blazing Star" },
+  { name: "Rusty Patched Bumblebee", cost: 200, boost: 0.4, envReq: 2.0, host: "Purple Coneflower", food: "Prairie Blazing Star" },
+  { name: "Hummingbird Clearwing Moth", cost: 300, boost: 0.6, envReq: 2.5, host: "Little Bluestem", food: "Butterfly Milkweed" }
+];
+
+// --- Milestone Comparisons ---
+const LANDMARKS = [
+  { size: 100, label: "a backyard garden" },
+  { size: 1000, label: "a community park" },
+  { size: 10000, label: "a small prairie" },
+  { size: 100000, label: "a nature reserve" },
+  { size: 1000000, label: "a national park" }
+];
+
+// --- Core Actions ---
+function scatter() { state.seeds += 1; render(); }
+
+function buyPlant(plant) {
+  if (state.seeds >= plant.cost) {
+    state.seeds -= plant.cost;
+    state.plants[plant.name] = (state.plants[plant.name] || 0) + 1;
+    render();
+  }
 }
 
-function buyPlant() {
-  if (state.seeds >= 10) {
-    state.seeds -= 10;
-    state.plants += 1;
+function buyPollinator(pol) {
+  if (state.seeds >= pol.cost && canUnlockPollinator(pol)) {
+    state.seeds -= pol.cost;
+    state.pollinators[pol.name] = (state.pollinators[pol.name] || 0) + 1;
     render();
-  } else {
-    alert("Not enough seeds to grow a plant!");
   }
+}
+
+function canUnlockPollinator(pol) {
+  return state.envQuality >= pol.envReq &&
+    (state.plants[pol.host] || 0) > 0 &&
+    (state.plants[pol.food] || 0) > 0;
 }
 
 function improveEnvironment() {
-  if (state.seeds >= 50) {
-    state.seeds -= 50;
+  if (state.stewardship >= 20) {
+    state.stewardship -= 20;
     state.envQuality += 0.2;
     render();
-  } else {
-    alert("Not enough seeds to improve environment!");
   }
 }
 
-// --- Automatic Growth Loop ---
-setInterval(() => {
-  // Plants generate seeds over time
-  state.seeds += Math.floor(state.plants * state.envQuality);
+// --- Prestige ---
+function prestige() {
+  // Calculate restored square footage
+  let addedRestored = Math.floor(state.stewardship * 2 + Object.values(state.plants).reduce((a,b)=>a+b,0) * 5);
+  state.restored += addedRestored;
+  state.ecoKnowledge += 1;
+
+  // Build comparison
+  let comparison = LANDMARKS.reduce((acc, mark) => {
+    if (state.restored >= mark.size) acc = mark.label;
+    return acc;
+  }, "a patch of wildflowers");
+
+  // Narrative report
+  let report = `
+    <h3>🌎 Rewilding Complete!</h3>
+    <p>You restored <b>${addedRestored.toLocaleString()}</b> sq ft this run.</p>
+    <p>Total restored so far: <b>${state.restored.toLocaleString()}</b> sq ft — about the size of ${comparison}.</p>
+    <p>Your work inspires others, earning you <b>+1 Eco Knowledge</b>.</p>
+  `;
+  document.getElementById("prestigeReport").innerHTML = report;
+  document.getElementById("prestigeReport").style.display = "block";
+
+  // Reset state
+  state.seeds = 0;
+  state.plants = {};
+  state.pollinators = {};
+  state.envQuality = 1.0;
+  state.stewardship = 0;
+
   render();
-}, 2000); // every 2 seconds
+}
 
-// --- Render Function ---
+// --- Growth Loop ---
+setInterval(() => {
+  let plantSeedGain = 0;
+  for (let plant of PLANTS) {
+    const count = state.plants[plant.name] || 0;
+    plantSeedGain += count * plant.rate;
+  }
+
+  let pollinatorBoost = 1;
+  let totalPolls = 0;
+  for (let pol of POLLINATORS) {
+    const count = state.pollinators[pol.name] || 0;
+    totalPolls += count;
+    pollinatorBoost += count * pol.boost;
+  }
+
+  let uniquePlants = Object.keys(state.plants).filter(p => state.plants[p] > 0).length;
+  let diversityMult = 1 + (uniquePlants - 1) * 0.1;
+  let prestigeMult = 1 + state.ecoKnowledge * 0.5;
+
+  let gain = plantSeedGain * state.envQuality * pollinatorBoost * diversityMult * prestigeMult;
+  state.seeds += Math.floor(gain);
+
+  let stewardshipGain = (totalPolls * 0.5 + uniquePlants * 0.2) * prestigeMult;
+  state.stewardship += stewardshipGain;
+
+  render();
+}, 2000);
+
+// --- Render ---
 function render() {
+  const totalPlants = Object.values(state.plants).reduce((a,b)=>a+b,0);
+  const totalPolls = Object.values(state.pollinators).reduce((a,b)=>a+b,0);
+  let uniquePlants = Object.keys(state.plants).filter(p => state.plants[p] > 0).length;
+  let diversityMult = 1 + (uniquePlants - 1) * 0.1;
+
   document.getElementById("seeds").textContent = state.seeds;
-  document.getElementById("plants").textContent = state.plants;
+  document.getElementById("plants").textContent = totalPlants;
+  document.getElementById("pollinators").textContent = totalPolls;
+  document.getElementById("stewardship").textContent = Math.floor(state.stewardship);
   document.getElementById("env").textContent = state.envQuality.toFixed(1);
+  document.getElementById("div").textContent = diversityMult.toFixed(1);
+  document.getElementById("eco").textContent = state.ecoKnowledge;
+  document.getElementById("restored").textContent = state.restored.toLocaleString();
 
-  // Simple shop
   const shopBody = document.getElementById("shopBody");
-  shopBody.innerHTML = "";
-  const plantBtn = document.createElement("button");
-  plantBtn.textContent = "Grow Plant (10 seeds)";
-  plantBtn.onclick = buyPlant;
-  shopBody.appendChild(plantBtn);
+  shopBody.innerHTML = "<h3>Plant Shop</h3>";
+  PLANTS.forEach(plant => {
+    const btn = document.createElement("button");
+    btn.textContent = `Buy ${plant.name} (${plant.cost} seeds) [+${plant.rate}/tick]`;
+    btn.onclick = () => buyPlant(plant);
+    shopBody.appendChild(btn);
+  });
 
+  shopBody.innerHTML += "<h3>Pollinator Habitat</h3>";
+  POLLINATORS.forEach(pol => {
+    const btn = document.createElement("button");
+    let label = `${pol.name} (${pol.cost} seeds) [Boost +${Math.round(pol.boost*100)}%]`;
+    if (!canUnlockPollinator(pol)) {
+      label += ` (Requires Env ${pol.envReq}, Host: ${pol.host}, Food: ${pol.food})`;
+      btn.disabled = true;
+    }
+    btn.textContent = label;
+    btn.onclick = () => buyPollinator(pol);
+    shopBody.appendChild(btn);
+  });
+
+  shopBody.innerHTML += "<h3>Habitat Restoration</h3>";
   const envBtn = document.createElement("button");
-  envBtn.textContent = "Improve Environment (50 seeds)";
+  envBtn.textContent = `Improve Environment (+0.2) [20 Stewardship]`;
   envBtn.onclick = improveEnvironment;
   shopBody.appendChild(envBtn);
 }
 
 // --- Init ---
 document.getElementById("scatterBtn").addEventListener("click", scatter);
+document.getElementById("prestigeBtn").addEventListener("click", prestige);
 render();
 </script>
 </body>
