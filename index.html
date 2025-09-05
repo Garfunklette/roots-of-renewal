@@ -190,4 +190,88 @@ function renderShop(){
   const h2=document.createElement("h3"); h2.textContent="Habitat Restoration"; shopBody.appendChild(h2);
   const envBtn=document.createElement("button"); envBtn.textContent="Improve Environment (+0.2) [20 Stewardship]";
   envBtn.addEventListener("click",improveEnvironment); shopBody.appendChild(envBtn);
-  const h3=document.createElement("h3"); h3
+  const h3=document.createElement("h3"); h3.textContent = "Pollinators";
+  shopBody.appendChild(h3);
+  POLLINATORS.forEach(pol => {
+    const div = document.createElement("div");
+    const status = state.pollinators[pol.name] ? "✅ Arrived" : `❌ Needs Env ${pol.envReq}, Host: ${pol.host}, Food: ${pol.food}`;
+    div.textContent = `${pol.name}: ${status}`;
+    shopBody.appendChild(div);
+  });
+}
+
+// --- Main Render ---
+function render() {
+  const totalPlants = Object.values(state.plants).reduce((a,b)=>a+b,0);
+  const totalPolls = Object.keys(state.pollinators).filter(k=>state.pollinators[k]).length;
+  const uniquePlants = Object.keys(state.plants).filter(p=>state.plants[p]>0).length;
+  const diversityMult = 1 + (uniquePlants-1)*0.1;
+
+  document.getElementById("seeds").textContent = state.seeds;
+  document.getElementById("plants").textContent = totalPlants;
+  document.getElementById("pollinators").textContent = totalPolls;
+  document.getElementById("stewardship").textContent = Math.floor(state.stewardship);
+  document.getElementById("env").textContent = state.envQuality.toFixed(1);
+  document.getElementById("div").textContent = diversityMult.toFixed(1);
+  document.getElementById("eco").textContent = state.ecoKnowledge;
+  document.getElementById("restored").textContent = state.restored.toLocaleString();
+
+  renderPlantCounts();
+  renderPollinatorCounts();
+  renderShop();
+}
+
+// --- Growth Loop ---
+setInterval(() => {
+  checkPollinators();
+  
+  // Seed gain from plants
+  let plantSeedGain = 0;
+  for (let plant of PLANTS) {
+    const count = state.plants[plant.name] || 0;
+    plantSeedGain += count * plant.rate;
+  }
+
+  // Pollinator boost
+  let pollinatorBoost = 1;
+  let totalPolls = 0;
+  for (let pol of POLLINATORS) {
+    if (state.pollinators[pol.name]) {
+      totalPolls += 1;
+      pollinatorBoost += pol.boost;
+    }
+  }
+
+  const uniquePlants = Object.keys(state.plants).filter(p=>state.plants[p]>0).length;
+  const diversityMult = 1 + (uniquePlants-1)*0.1;
+  const prestigeMult = 1 + state.ecoKnowledge*0.5;
+
+  state.seeds += Math.floor(plantSeedGain * state.envQuality * pollinatorBoost * diversityMult * prestigeMult);
+  state.stewardship += (totalPolls*0.5 + uniquePlants*0.2) * prestigeMult;
+
+  // Convert seeds to plants
+  if (state.seeds > 0) {
+    const seedsToConvert = Math.min(state.seeds, Math.floor(Math.random()*3)+1);
+    for (let i = 0; i < seedsToConvert; i++) {
+      const chosenPlant = choosePlantByWeight(PLANTS);
+      state.plants[chosenPlant.name] = (state.plants[chosenPlant.name] || 0) + 1;
+      state.seeds -= 1;
+      if (!firstAutoPlantLogged) {
+        logEntry(`🌿 A ${chosenPlant.name} has sprouted on its own; life begins to flourish.`, chosenPlant.name);
+        firstAutoPlantLogged = true;
+      }
+    }
+  }
+
+  render();
+}, 2000);
+
+// --- Event Listeners ---
+document.getElementById("scatterBtn").addEventListener("click", scatter);
+document.getElementById("prestigeBtn").addEventListener("click", prestige);
+
+// --- Initial Render ---
+render();
+</script>
+</body>
+</html>
