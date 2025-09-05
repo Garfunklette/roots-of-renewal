@@ -82,39 +82,56 @@ const LANDMARKS = [
 ];
 
 // --- Journal ---
-function logPlanting(plant) {
-  logEntry(`🌱 Planted ${plant.name}; it sways gently in the breeze and may soon attract pollinators.`);
+function logEntry(text) {
+  const entries = document.getElementById("entries");
+  const div = document.createElement("div");
+  div.className = "entry";
+  div.textContent = text;
+  entries.appendChild(div);
+  entries.scrollTop = entries.scrollHeight;
 }
 
-function logEnvironmentImprovement() {
-  logEntry(`🌎 The land feels renewed; the soil and surrounding flora thrive a little more each day.`);
+// --- Scatter Seeds with Naturalist Journal ---
+let lastLoggedSeeds = 0;
+function scatter() {
+  state.seeds += 1;
+
+  const magnitude = Math.floor(Math.log10(state.seeds));
+  const nextThreshold = Math.pow(10, magnitude);
+
+  if (state.seeds === 1 || (state.seeds === nextThreshold && state.seeds !== lastLoggedSeeds)) {
+    lastLoggedSeeds = state.seeds;
+
+    let message = "";
+    if (state.seeds === 1) message = "🌱 Scattered the first seed; a tiny sprout may soon emerge.";
+    else if (state.seeds === 10) message = "🌱 Ten seeds now lie in the soil; tiny shoots may soon peek through.";
+    else if (state.seeds === 100) message = "🌱 A hundred seeds scattered; the meadow begins to stir with life.";
+    else if (state.seeds === 1000) message = "🌱 A thousand seeds cover the ground; a flourishing patch emerges.";
+    else if (state.seeds === 10000) message = "🌱 Tens of thousands of seeds lie sown; the land hums with renewed vitality.";
+    else message = `🌱 ${state.seeds.toLocaleString()} seeds scattered; nature awakens slowly.`;
+
+    logEntry(message);
+  }
+
+  render();
 }
 
-function logPollinatorArrival(pol) {
-  logEntry(`🐝 ${pol.name} appears, drawn by the ${pol.host} and ${pol.food}; its presence signals a flourishing habitat.`);
-}
-
-function logPrestige(addedRestored, comparison) {
-  logEntry(`📖 Rewilding complete! This run restored ${addedRestored.toLocaleString()} sq ft. Total restored: ${state.restored.toLocaleString()} sq ft — roughly the size of ${comparison}. Nature celebrates your stewardship.`);
-}
-
-// --- Actions ---
-function scatter() { state.seeds += 1; render(); }
-
+// --- Planting ---
 function buyPlant(plant) {
   if (state.seeds >= plant.cost) {
     state.seeds -= plant.cost;
     state.plants[plant.name] = (state.plants[plant.name] || 0) + 1;
-    logEntry(`🌱 Planted ${plant.name}.`);
+    logEntry(`🌿 Planted ${plant.name}; its leaves and blooms will invite pollinators soon.`);
     render();
   }
 }
 
+// --- Environment Improvement ---
 function improveEnvironment() {
   if (state.stewardship >= 20) {
     state.stewardship -= 20;
     state.envQuality += 0.2;
-    logEntry(`🌎 Environment improved. Quality now ${state.envQuality.toFixed(1)}x.`);
+    logEntry(`🌎 The land feels healthier; the soil and surrounding flora thrive a little more.`);
     render();
   }
 }
@@ -128,13 +145,13 @@ function checkPollinators() {
       let foodOk = (state.plants[pol.food] || 0) > 0;
       if (envOk && hostOk && foodOk) {
         state.pollinators[pol.name] = true;
-        logEntry(`🐝 ${pol.name} arrived, attracted by ${pol.host} and ${pol.food}.`);
+        logEntry(`🐝 ${pol.name} arrives, drawn by the ${pol.host} and ${pol.food}; its presence signals a flourishing habitat.`);
       }
     }
   });
 }
 
-// --- Prestige ---
+// --- Prestige / Rewild Land ---
 function prestige() {
   let addedRestored = Math.floor(state.stewardship * 2 + Object.values(state.plants).reduce((a,b)=>a+b,0) * 5);
   state.restored += addedRestored;
@@ -145,16 +162,15 @@ function prestige() {
     return acc;
   }, "a patch of wildflowers");
 
-  let report = `
+  document.getElementById("prestigeReport").innerHTML = `
     <h3>🌎 Rewilding Complete!</h3>
     <p>You restored <b>${addedRestored.toLocaleString()}</b> sq ft this run.</p>
     <p>Total restored so far: <b>${state.restored.toLocaleString()}</b> sq ft — about the size of ${comparison}.</p>
     <p>Your work inspires others, earning you <b>+1 Eco Knowledge</b>.</p>
   `;
-  document.getElementById("prestigeReport").innerHTML = report;
   document.getElementById("prestigeReport").style.display = "block";
 
-  logEntry(`📖 Rewilding complete: ${addedRestored.toLocaleString()} sq ft restored this run. +1 Eco Knowledge.`);
+  logEntry(`📖 Rewilding complete! This run restored ${addedRestored.toLocaleString()} sq ft. Total restored: ${state.restored.toLocaleString()} sq ft — roughly the size of ${comparison}. Nature celebrates your stewardship.`);
 
   // Reset
   state.seeds = 0;
@@ -165,6 +181,7 @@ function prestige() {
 
   // Clear journal for new run
   document.getElementById("entries").innerHTML = "";
+  lastLoggedSeeds = 0;
   render();
 }
 
