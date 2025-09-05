@@ -1,396 +1,217 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Roots of Renewal — Phaser Starter</title>
 <style>
-  :root{
-    --bg:#f7fbf7; --ink:#1c2a1e; --muted:#6a7a6c; --panel:#fff;
-    --accent:#9bd18b;
-  }
-  html,body{height:100%; margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
-  body{background:linear-gradient(180deg,#eef8ee 0%, #fdfcf7 100%); color:var(--ink); -webkit-tap-highlight-color:transparent;}
-  .app{display:flex; flex-direction:column; height:100dvh; max-height:100dvh;}
-  header{padding:10px 14px;}
-  .title{font-weight:700;}
-  .resources{display:flex; gap:8px; margin-top:8px;}
-  .pill{background:var(--panel); padding:6px 10px; border-radius:999px; box-shadow:0 6px 18px rgba(0,0,0,0.06); font-size:14px;}
-  /* Phaser container - responsive portrait */
-  #phaserContainer{flex:1; margin:12px; border-radius:12px; overflow:hidden; box-shadow:0 10px 26px rgba(23,66,18,0.08); background:linear-gradient(180deg,#e6f2e6,#f7f3e4);}
-  .uiRow{display:flex; gap:10px; padding:10px 14px; align-items:center; justify-content:center;}
-  .scatter{width:92%; max-width:480px; padding:12px 14px; border-radius:999px; border:none; font-weight:700; font-size:18px; background:linear-gradient(90deg,var(--accent),#bff0b2); box-shadow:0 10px 24px rgba(73,171,79,0.28);}
-  .shop{background:var(--panel); border-radius:12px; padding:8px; margin:8px 12px; max-height:30vh; overflow:auto;}
-  .item{display:flex; justify-content:space-between; padding:8px 6px; border-bottom:1px solid #eef2ee; align-items:center;}
-  .buy{padding:8px 10px; border-radius:10px; font-weight:700;}
-  .buy.disabled{background:#d6e6d6; color:#6c7a6b}
-  .buy.enabled{background:#2e7d32; color:white}
-  .nav{display:flex; justify-content:space-around; padding:8px 10px; margin-top:6px; background:#fff;}
-  dialog{border:none;border-radius:12px;padding:0; box-shadow:0 12px 30px rgba(0,0,0,0.16);}
-  .modal-head{display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #eef2ee}
-  .modal-body{padding:12px; max-height:60vh; overflow:auto}
-  .story-entry{padding:10px 0;border-bottom:1px dashed #e6efe6}
-  .beeIcon{font-size:18px}
-  /* force portrait look on desktop for quick testing */
-  @media(min-width:900px){
-    body{font-size:16px}
-    #phaserContainer{height:56vh}
-  }
+:root{--bg:#f7fbf7;--ink:#1c2a1e;--muted:#6a7a6c;--panel:#fff;--accent:#9bd18b}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+body{background:linear-gradient(180deg,#eef8ee 0%,#fdfcf7 100%);color:var(--ink);-webkit-tap-highlight-color:transparent}
+.app{display:flex;flex-direction:column;height:100dvh;max-height:100dvh}
+header{padding:10px 14px}
+.title{font-weight:700}
+.resources{display:flex;gap:8px;margin-top:8px}
+.pill{background:var(--panel);padding:6px 10px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,0.06);font-size:14px}
+#phaserContainer{flex:1;margin:12px;border-radius:12px;overflow:hidden;box-shadow:0 10px 26px rgba(23,66,18,0.08);background:linear-gradient(180deg,#e6f2e6,#f7f3e4)}
+.uiRow{display:flex;gap:10px;padding:10px 14px;align-items:center;justify-content:center}
+.scatter{width:92%;max-width:480px;padding:12px 14px;border-radius:999px;border:none;font-weight:700;font-size:18px;background:linear-gradient(90deg,var(--accent),#bff0b2);box-shadow:0 10px 24px rgba(73,171,79,0.28)}
+.shop{background:var(--panel);border-radius:12px;padding:8px;margin:8px 12px;max-height:30vh;overflow:auto}
+.item{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px solid #eef2ee;align-items:center}
+.buy{padding:8px 10px;border-radius:10px;font-weight:700}
+.buy.disabled{background:#d6e6d6;color:#6c7a6b}
+.buy.enabled{background:#2e7d32;color:white}
+.nav{display:flex;justify-content:space-around;padding:8px 10px;margin-top:6px;background:#fff}
+dialog{border:none;border-radius:12px;padding:0;box-shadow:0 12px 30px rgba(0,0,0,0.16)}
+.modal-head{display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #eef2ee}
+.modal-body{padding:12px;max-height:60vh;overflow:auto}
+.story-entry{padding:10px 0;border-bottom:1px dashed #e6efe6}
+.beeIcon{font-size:18px}
+@media(min-width:900px){body{font-size:16px}#phaserContainer{height:56vh}}
 </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="title">🌞 Roots of Renewal — Phaser Prototype</div>
-      <div class="resources">
-        <div class="pill">🌱 <span id="seeds">0</span></div>
-        <div class="pill">🐝 <span id="visits">0</span></div>
-        <div class="pill">🌎 <span id="biodiv">0</span></div>
-      </div>
-    </header>
-
-    <div id="phaserContainer"></div>
-
-    <div class="uiRow">
-      <button id="scatterBtn" class="scatter">Scatter Seeds 🌱 +1</button>
+<div class="app">
+  <header>
+    <div class="title">🌞 Roots of Renewal — Phaser Prototype</div>
+    <div class="resources">
+      <div class="pill">🌱 <span id="seeds">0</span></div>
+      <div class="pill">🐝 <span id="visits">0</span></div>
+      <div class="pill">🌎 <span id="biodiv">0</span></div>
     </div>
+  </header>
 
-    <div class="shop" id="shopBody"></div>
+  <div id="phaserContainer"></div>
 
-    <div class="nav">
-      <button id="navJournal">📖 Journal</button>
-      <button id="navMenu">⚙️ Menu</button>
-      <div style="width:6px"></div>
-    </div>
+  <div class="uiRow">
+    <button id="scatterBtn" class="scatter">Scatter Seeds 🌱 +1</button>
   </div>
 
-  <dialog id="journalModal">
-    <div class="modal-head"><strong>📖 Field Journal</strong><button id="closeJournal">✕</button></div>
-    <div class="modal-body" id="journalBody"></div>
-  </dialog>
+  <div class="shop" id="shopBody"></div>
 
-  <dialog id="menuModal">
-    <div class="modal-head"><strong>⚙️ Menu</strong><button id="closeMenu">✕</button></div>
-    <div class="modal-body">
-      <button id="prestigeBtn" class="buy disabled" disabled>🌱 Seed a New Land (Prestige)</button>
-      <p style="color:#6a7a6c; font-size:13px">Prestige available after 10 unique species.</p>
-      <hr />
-      <div style="display:flex; gap:8px; margin-top:8px;">
-        <button id="saveBtn" class="buy enabled">💾 Save</button>
-        <button id="resetBtn" style="color:#b00020; background:none; border:none;">🗑️ Reset</button>
-      </div>
-      <p id="saveInfo" style="color:var(--muted); font-size:12px; margin-top:8px;"></p>
+  <div class="nav">
+    <button id="navJournal">📖 Journal</button>
+    <button id="navMenu">⚙️ Menu</button>
+    <div style="width:6px"></div>
+  </div>
+</div>
+
+<dialog id="journalModal">
+  <div class="modal-head"><strong>📖 Field Journal</strong><button id="closeJournal">✕</button></div>
+  <div class="modal-body" id="journalBody"></div>
+</dialog>
+
+<dialog id="menuModal">
+  <div class="modal-head"><strong>⚙️ Menu</strong><button id="closeMenu">✕</button></div>
+  <div class="modal-body">
+    <button id="prestigeBtn" class="buy disabled" disabled>🌱 Seed a New Land (Prestige)</button>
+    <p style="color:#6a7a6c; font-size:13px">Prestige available after 10 unique species.</p>
+    <hr />
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="saveBtn" class="buy enabled">💾 Save</button>
+      <button id="resetBtn" style="color:#b00020; background:none; border:none;">🗑️ Reset</button>
     </div>
-  </dialog>
+    <p id="saveInfo" style="color:var(--muted); font-size:12px; margin-top:8px;"></p>
+  </div>
+</dialog>
 
-  <div id="toast" style="position:fixed; left:50%; bottom:84px; transform:translateX(-50%); background:#111;color:#fff;padding:8px 12px;border-radius:12px;opacity:0;pointer-events:none;"></div>
+<div id="toast" style="position:fixed; left:50%; bottom:84px; transform:translateX(-50%); background:#111;color:#fff;padding:8px 12px;border-radius:12px;opacity:0;pointer-events:none;"></div>
 
-  <!-- Phaser CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script>
-  // ---------- Game data (same plant/pollinator set as earlier) ----------
-  const PLANTS = [
-    { id:'rudbeckia', name:'Black-eyed Susan', cost:10, sps:0.5, icon:'🌻', story:"A golden eye opens to the sun. For the first time in years, something blooms here." },
-    { id:'dropseed', name:'Prairie Dropseed', cost:15, sps:0.6, icon:'🌾', story:"Roots weave deep, binding the earth together. The soil breathes easier." },
-    { id:'milkweed', name:'Milkweed', cost:20, sps:0.7, icon:'🪻', story:"The tall stalks bleed white sap. Monarchs will return when they smell this promise." },
-    { id:'coneflower', name:'Purple Coneflower', cost:25, sps:0.8, icon:'🌸', story:"A bright purple crown lifts above the soil. Bees will not ignore it for long." },
-    { id:'blazingstar', name:'Blazing Star', cost:40, sps:1.2, icon:'⭐', story:"Spikes of violet blaze at dusk; swallowtails find their runway." },
-    { id:'indigo', name:'Wild Indigo', cost:55, sps:1.6, icon:'🟣', story:"Blue pods rattle softly—legumes feeding the soil as much as the eye." },
-    { id:'aster', name:'Smooth Aster', cost:80, sps:2.2, icon:'💠', story:"Late bloomers hold the door for autumn bees, a final feast." },
-    { id:'liatris', name:'Prairie Blazingstar', cost:120, sps:3.0, icon:'💜', story:"A lighthouse for butterflies, lit by nectar." },
-    { id:'vervain', name:'Hoary Vervain', cost:160, sps:3.5, icon:'🔮', story:"Spired blossoms sip the sun, bead by bead." },
-    { id:'rattlesnake', name:'Rattlesnake Master', cost:200, sps:4.0, icon:'🧪', story:"Silver globes bristle with secrets; hoverflies read them like runes." },
-  ];
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script>
+// ------------------ Game Data ------------------
+const PLANTS=[
+{id:'rudbeckia',name:'Black-eyed Susan',cost:10,sps:0.5,icon:'🌻',story:"A golden eye opens to the sun. For the first time in years, something blooms here."},
+{id:'dropseed',name:'Prairie Dropseed',cost:15,sps:0.6,icon:'🌾',story:"Roots weave deep, binding the earth together. The soil breathes easier."},
+{id:'milkweed',name:'Milkweed',cost:20,sps:0.7,icon:'🪻',story:"The tall stalks bleed white sap. Monarchs will return when they smell this promise."},
+{id:'coneflower',name:'Purple Coneflower',cost:25,sps:0.8,icon:'🌸',story:"A bright purple crown lifts above the soil. Bees will not ignore it for long."},
+{id:'blazingstar',name:'Blazing Star',cost:40,sps:1.2,icon:'⭐',story:"Spikes of violet blaze at dusk; swallowtails find their runway."},
+{id:'indigo',name:'Wild Indigo',cost:55,sps:1.6,icon:'🟣',story:"Blue pods rattle softly—legumes feeding the soil as much as the eye."},
+{id:'aster',name:'Smooth Aster',cost:80,sps:2.2,icon:'💠',story:"Late bloomers hold the door for autumn bees, a final feast."},
+{id:'liatris',name:'Prairie Blazingstar',cost:120,sps:3.0,icon:'💜',story:"A lighthouse for butterflies, lit by nectar."},
+{id:'vervain',name:'Hoary Vervain',cost:160,sps:3.5,icon:'🔮',story:"Spired blossoms sip the sun, bead by bead."},
+{id:'rattlesnake',name:'Rattlesnake Master',cost:200,sps:4.0,icon:'🧪',story:"Silver globes bristle with secrets; hoverflies read them like runes."}
+];
 
-  const POLLINATORS = [
-    { id:'bumblebee', name:'Bumblebee', icon:'🐝',
-      unlock: s => s.uniquePlants >= 2,
-      effect: s => { s.multiplier *= 1.10; s.visits += 1; },
-      story:"The buzz of wings breaks the silence. A worker bee dusts herself with pollen."
-    },
-    { id:'monarch', name:'Monarch', icon:'🦋',
-      unlock: s => s.owned.milkweed > 0,
-      effect: s => { s.multiplier *= 1.08; s.visits += 1; },
-      story:"She drifts like stained glass on the wind, tasting the milkweed before she settles."
-    },
-    { id:'beetle', name:'Ground Beetle', icon:'🐞',
-      unlock: s => s.totalPlants >= 10,
-      effect: s => { s.multiplier *= 1.05; s.visits += 1; },
-      story:"Clumsy, armored, diligent—the beetle burrows, unseen but essential."
-    },
-  ];
+const POLLINATORS=[
+{id:'bumblebee',name:'Bumblebee',icon:'🐝',unlock:s=>s.uniquePlants>=2,effect:s=>{s.multiplier*=1.10;s.visits+=1},story:"The buzz of wings breaks the silence. A worker bee dusts herself with pollen."},
+{id:'monarch',name:'Monarch',icon:'🦋',unlock:s=>s.owned.milkweed>0,effect:s=>{s.multiplier*=1.08;s.visits+=1},story:"She drifts like stained glass on the wind, tasting the milkweed before she settles."},
+{id:'beetle',name:'Ground Beetle',icon:'🐞',unlock:s=>s.totalPlants>=10,effect:s=>{s.multiplier*=1.05;s.visits+=1},story:"Clumsy, armored, diligent—the beetle burrows, unseen but essential."}
+];
 
-  // ---------- State ----------
-  function defaultState(){ return {
-    seeds:0, visits:0, biodiversity:0, multiplier:1,
-    owned: Object.fromEntries(PLANTS.map(p=>[p.id,0])),
-    unlockedStories:{}, unlockedPollinators:{}, totalPlants:0, uniquePlants:0,
-    lastTick: Date.now(), lastSave: null
-  }; }
-  let state = load() || defaultState();
+// ------------------ State ------------------
+function defaultState(){ return {seeds:0,visits:0,biodiversity:0,multiplier:1,owned:Object.fromEntries(PLANTS.map(p=>[p.id,0])),unlockedStories:{},unlockedPollinators:{},totalPlants:0,uniquePlants:0,lastTick:Date.now(),lastSave:null}; }
+let state = load()||defaultState();
 
-  // ---------- Helpers ----------
-  function toast(msg, time=1400){
-    const t = document.getElementById('toast'); t.textContent = msg; t.style.transition='none'; t.style.opacity=1;
-    clearTimeout(t._hide); t._hide = setTimeout(()=>{ t.style.transition='opacity .3s'; t.style.opacity=0 }, time);
+// ------------------ Helpers ------------------
+function toast(msg,time=1400){const t=document.getElementById('toast');t.textContent=msg;t.style.transition='none';t.style.opacity=1;clearTimeout(t._hide);t._hide=setTimeout(()=>{t.style.transition='opacity .3s';t.style.opacity=0},time);}
+function fmt(n){return Math.floor(n).toLocaleString();}
+
+// ------------------ Phaser Scene ------------------
+let phaserGame;
+class FieldScene extends Phaser.Scene{
+  constructor(){super({key:'FieldScene'});}
+  create(){
+    const g=this.add.graphics(); g.fillStyle(0xeef8ee,1); g.fillRoundedRect(0,0,this.scale.width,this.scale.height,12);
+    this.plantGroup=this.add.group(); this.pollGroup=this.add.group();
+    this.updatePlantsFromState();
+    this.time.addEvent({delay:2000,loop:true,callback:()=>this.floatPollinators()});
+    this.t=0;
   }
-  function fmt(n){ return Math.floor(n).toLocaleString(); }
-
-  // ---------- Phaser Scene ----------
-  let phaserGame;
-  class FieldScene extends Phaser.Scene{
-    constructor(){ super({ key: 'FieldScene' }); }
-    preload(){
-      // no assets — using emoji text
-    }
-    create(){
-      // background gradient rectangle (visually)
-      const g = this.add.graphics();
-      g.fillStyle(0xeef8ee,1);
-      g.fillRoundedRect(0,0,this.scale.width,this.scale.height,12);
-
-      this.plantGroup = this.add.group();
-      this.pollGroup = this.add.group();
-
-      this.updatePlantsFromState();
-
-      // gentle drifting for pollinators handled by tween loop
-      this.time.addEvent({ delay: 2000, loop: true, callback: ()=>this.floatPollinators() });
-
-      // seasonal hue / tinting (slow)
-      this.t = 0;
-    }
-
-    update(time, dt){
-      this.t += dt/1000;
-      // slight color shift applied to background rectangle by adjusting camera background
-      const hue = (this.t*5)%360;
-      // (no direct CSS — can tint layer, but keep subtle)
-    }
-
-    updatePlantsFromState(){
-      // clear existing
-      this.plantGroup.clear(true, true);
-      const w = this.scale.width, h = this.scale.height;
-      // place each owned plant instance as emoji text
-      PLANTS.forEach((p, idx)=>{
-        const count = state.owned[p.id] || 0;
-        for(let i=0;i<count;i++){
-          // create text object
-          const x = Phaser.Math.Between(Math.floor(w*0.08), Math.floor(w*0.92));
-          const y = Phaser.Math.Between(Math.floor(h*0.10), Math.floor(h*0.88));
-          const t = this.add.text(x,y, p.icon, { fontSize: `${16 + (idx%6)*3}px` }).setDepth(2);
-          // slight pop-in animation
-          t.setScale(0).setAlpha(0);
-          this.tweens.add({ targets:t, scale:1, alpha:1, duration:300, ease:'Back' });
-          this.plantGroup.add(t);
-        }
-      });
-    }
-
-    spawnPollinator(pol){
-      // create one text icon and give it a wandering tween
-      const w = this.scale.width, h = this.scale.height;
-      const x = Phaser.Math.Between(Math.floor(w*0.1), Math.floor(w*0.9));
-      const y = Phaser.Math.Between(Math.floor(h*0.1), Math.floor(h*0.8));
-      const t = this.add.text(x,y, pol.icon, { fontSize: '22px' }).setDepth(5);
-      this.pollGroup.add(t);
-      // tween to random point repeatedly
-      const tween = this.tweens.add({
-        targets: t,
-        x: Phaser.Math.Between(Math.floor(w*0.08), Math.floor(w*0.92)),
-        y: Phaser.Math.Between(Math.floor(h*0.08), Math.floor(h*0.92)),
-        duration: Phaser.Math.Between(3000,7000),
-        ease: 'Sine.easeInOut',
-        yoyo: true,
-        repeat: -1,
-        onYoyo: ()=>{},
-      });
-      // small hover time-limited particle: scale bounce
-      this.tweens.add({ targets:t, scale:1.05, yoyo:true, repeat:-1, duration:1200, ease:'Sine.easeInOut' });
-    }
-
-    floatPollinators(){
-      // nudge pollinators positions slightly to avoid flatness
-      this.pollGroup.children.iterate(child=>{
-        if(!child) return;
-        const nx = Phaser.Math.Between(child.x-10, child.x+10);
-        const ny = Phaser.Math.Between(child.y-6, child.y+6);
-        this.tweens.add({ targets: child, x: nx, y: ny, duration: 1800, ease:'Sine.easeInOut' });
-      });
-    }
+  update(time,dt){this.t+=dt/1000;}
+  spawnPlantInstance(p){
+    const w=this.scale.width,h=this.scale.height;
+    const x=Phaser.Math.Between(Math.floor(w*0.08),Math.floor(w*0.92));
+    const y=Phaser.Math.Between(Math.floor(h*0.10),Math.floor(h*0.88));
+    const t=this.add.text(x,y,p.icon,{fontSize:`${16+(PLANTS.indexOf(p)%6)*3}px`}).setDepth(2).setScale(0).setAlpha(0);
+    this.tweens.add({targets:t,scale:1,alpha:1,duration:600,ease:'Back.easeOut'});
+    this.plantGroup.add(t);
   }
-
-  // create Phaser game sized to container element
-  function createPhaser(){
-    const container = document.getElementById('phaserContainer');
-    const w = Math.max(360, Math.min(window.innerWidth-24, 540));
-    const h = Math.floor(window.innerHeight * 0.46);
-    const config = {
-      type: Phaser.AUTO,
-      parent: 'phaserContainer',
-      width: w,
-      height: h,
-      backgroundColor: 0xeef8ee,
-      scene: [ FieldScene ],
-      scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
-    };
-    phaserGame = new Phaser.Game(config);
-    // when created, we can access scene and call updatePlantsFromState later
-    phaserGame.events.on('ready', ()=>{ /* noop */ });
+  updatePlantsFromState(){
+    this.plantGroup.clear(true,true);
+    for(const p of PLANTS){for(let i=0;i<(state.owned[p.id]||0);i++){this.spawnPlantInstance(p);}}
   }
-
-  // ---------- Rendering HTML shop & journal ----------
-  const seedsEl = document.getElementById('seeds');
-  const visitsEl = document.getElementById('visits');
-  const biodivEl = document.getElementById('biodiv');
-  const shopBody = document.getElementById('shopBody');
-
-  function renderResources(){
-    seedsEl.textContent = Math.floor(state.seeds);
-    visitsEl.textContent = state.visits;
-    biodivEl.textContent = state.biodiversity;
+  spawnPollinator(pol){
+    const w=this.scale.width,h=this.scale.height;
+    const x=Phaser.Math.Between(Math.floor(w*0.1),Math.floor(w*0.9));
+    const y=Phaser.Math.Between(Math.floor(h*0.1),Math.floor(h*0.8));
+    const t=this.add.text(x,y,pol.icon,{fontSize:'22px'}).setDepth(5);
+    this.pollGroup.add(t);
+    this.tweens.add({targets:t,x:Phaser.Math.Between(Math.floor(w*0.08),Math.floor(w*0.92)),y:Phaser.Math.Between(Math.floor(h*0.08),Math.floor(h*0.92)),duration:Phaser.Math.Between(3000,7000),ease:'Sine.easeInOut',yoyo:true,repeat:-1});
+    this.tweens.add({targets:t,scale:1.05,yoyo:true,repeat:-1,duration:1200,ease:'Sine.easeInOut'});
   }
-
-  function renderShop(){
-    shopBody.innerHTML = '';
-    PLANTS.forEach(p=>{
-      const row = document.createElement('div'); row.className='item';
-      const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:700">${p.icon} ${p.name}</div><div style="color:#6a7a6c;font-size:13px">${p.story}</div>`;
-      const btn = document.createElement('button'); const afford = state.seeds >= p.cost;
-      btn.textContent = `Buy ${p.cost}🌱`; btn.className = 'buy ' + (afford ? 'enabled':'disabled'); btn.disabled = !afford;
-      btn.addEventListener('click', ()=>{ buyPlant(p); });
-      row.appendChild(left); row.appendChild(btn); shopBody.appendChild(row);
-    });
+  floatPollinators(){
+    this.pollGroup.children.iterate(c=>{if(!c)return;const nx=Phaser.Math.Between(c.x-10,c.x+10),ny=Phaser.Math.Between(c.y-6,c.y+6);this.tweens.add({targets:c,x:nx,y:ny,duration:1800,ease:'Sine.easeInOut'});});
   }
+}
 
-  function renderJournal(){
-    const body = document.getElementById('journalBody'); body.innerHTML = '';
-    PLANTS.forEach(p=>{
-      if(state.unlockedStories[p.id]){
-        const div = document.createElement('div'); div.className='story-entry';
-        div.innerHTML = `<h5 style="margin:0">${p.icon} ${p.name}</h5><div style="margin-top:6px">“${p.story}”</div>`;
-        body.appendChild(div);
-      }
-    });
-    Object.keys(state.unlockedPollinators).forEach(pid=>{
-      const pol = POLLINATORS.find(p=>p.id===pid);
-      const div = document.createElement('div'); div.className='story-entry';
-      div.innerHTML = `<h5 style="margin:0">${pol.icon} ${pol.name}</h5><div style="margin-top:6px">“${pol.story}”</div>`;
-      body.appendChild(div);
-    });
-  }
+function createPhaser(){
+  const container=document.getElementById('phaserContainer');
+  const w=Math.max(360,Math.min(window.innerWidth-24,540)),h=Math.floor(window.innerHeight*0.46);
+  const config={type:Phaser.AUTO,parent:'phaserContainer',width:w,height:h,backgroundColor:0xeef8ee,scene:[FieldScene],scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH}};
+  phaserGame=new Phaser.Game(config);
+}
 
-  function checkPrestigeAvailability(){
-    const unique = Object.values(state.owned).filter(v=>v>0).length;
-    state.uniquePlants = unique;
-    const btn = document.getElementById('prestigeBtn');
-    btn.disabled = unique < 10;
-    btn.className = 'buy ' + (unique >= 10 ? 'enabled':'disabled');
-  }
+// ------------------ HTML UI ------------------
+const seedsEl=document.getElementById('seeds'),visitsEl=document.getElementById('visits'),biodivEl=document.getElementById('biodiv'),shopBody=document.getElementById('shopBody');
 
-  // ---------- Mechanics ----------
-  function scatter(){ state.seeds += 1; renderResources(); saveThrottled(); }
-  document.getElementById('scatterBtn').addEventListener('click', scatter);
-
-  function buyPlant(p){
-    if(state.seeds < p.cost) return;
-    state.seeds -= p.cost;
-    state.owned[p.id] = (state.owned[p.id]||0) + 1;
-    state.totalPlants += 1;
-    if(!state.unlockedStories[p.id]){ state.unlockedStories[p.id] = true; toast('📖 New journal entry unlocked!'); }
-    // update Phaser visuals: refresh scene's plant group
-    const scene = phaserGame.scene.keys['FieldScene'];
-    if(scene) scene.updatePlantsFromState();
-    renderResources(); renderShop(); renderJournal(); saveThrottled();
-    tryUnlockPollinators();
-    checkPrestigeAvailability();
-  }
-
-  function seedsPerSecond(){
-    let base=0; for(const p of PLANTS){ base += (state.owned[p.id]||0) * p.sps; } return base * state.multiplier;
-  }
-
-  function gameTick(){
-    const now = Date.now(); const dt = Math.max(0, (now - state.lastTick)/1000);
-    state.lastTick = now;
-    state.seeds += seedsPerSecond() * dt;
-    renderResources();
-  }
-  setInterval(gameTick, 250);
-
-  function tryUnlockPollinators(){
-    for(const pol of POLLINATORS){
-      if(state.unlockedPollinators[pol.id]) continue;
-      state.uniquePlants = Object.values(state.owned).filter(v=>v>0).length;
-      if(pol.unlock(state)){
-        state.unlockedPollinators[pol.id] = true;
-        pol.effect(state);
-        showPollinator(pol);
-        toast(`🆕 ${pol.name} has arrived!`);
-        renderJournal(); renderResources(); saveThrottled();
-      }
-    }
-  }
-
-  function showPollinator(pol){
-    const scene = phaserGame.scene.keys['FieldScene'];
-    if(scene) scene.spawnPollinator(pol);
-  }
-
-  function prestige(){
-    if(Object.values(state.owned).filter(v=>v>0).length < 10) return;
-    const biodiversityGain = 1;
-    const kept = (state.biodiversity||0) + biodiversityGain;
-    state = defaultState();
-    state.biodiversity = kept;
-    state.multiplier *= (1 + kept * 0.1);
-    toast('🌎 You seeded a new land. +1 Biodiversity!');
-    // refresh visuals and UI
-    const scene = phaserGame.scene.keys['FieldScene'];
-    if(scene) scene.updatePlantsFromState();
-    renderAll(); save();
-  }
-
-  // ---------- Save / Load ----------
-  const SAVE_KEY = 'roots-of-renewal-phaser-v1';
-  function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); state.lastSave = new Date().toISOString(); document.getElementById('saveInfo').textContent = `Saved at ${new Date(state.lastSave).toLocaleTimeString()}`;}catch(e){console.warn(e);} }
-  let saveTimer;
-  function saveThrottled(){ clearTimeout(saveTimer); saveTimer = setTimeout(save, 500); }
-  function load(){ try{ const raw = localStorage.getItem(SAVE_KEY); if(!raw) return null; const obj = JSON.parse(raw); const base = defaultState(); return Object.assign(base, obj, { owned: Object.assign(base.owned, obj.owned||{}) }); }catch(e){ return null; } }
-
-  // ---------- UI wiring ----------
-  document.getElementById('navJournal').addEventListener('click', ()=>document.getElementById('journalModal').showModal());
-  document.getElementById('closeJournal').addEventListener('click', ()=>document.getElementById('journalModal').close());
-  document.getElementById('navMenu').addEventListener('click', ()=>{
-    document.getElementById('saveInfo').textContent = state.lastSave ? `Last saved: ${new Date(state.lastSave).toLocaleString()}` : 'Not yet saved';
-    document.getElementById('menuModal').showModal();
+function renderResources(){seedsEl.textContent=Math.floor(state.seeds);visitsEl.textContent=state.visits;biodivEl.textContent=state.biodiversity;}
+function renderShop(){
+  shopBody.innerHTML='';
+  PLANTS.forEach(p=>{
+    const row=document.createElement('div'); row.className='item';
+    const left=document.createElement('div'); left.innerHTML=`<div style="font-weight:700">${p.icon} ${p.name}</div><div style="color:#6a7a6c;font-size:13px">${p.story}</div>`;
+    const btn=document.createElement('button'); const afford=state.seeds>=p.cost;
+    btn.textContent=`Buy ${p.cost}🌱`; btn.className='buy '+(afford?'enabled':'disabled'); btn.disabled=!afford;
+    btn.addEventListener('click',()=>{buyPlant(p);});
+    row.appendChild(left); row.appendChild(btn); shopBody.appendChild(row);
   });
-  document.getElementById('closeMenu').addEventListener('click', ()=>document.getElementById('menuModal').close());
-  document.getElementById('saveBtn').addEventListener('click', save);
-  document.getElementById('resetBtn').addEventListener('click', ()=>{ if(confirm('Hard reset all progress?')){ localStorage.removeItem(SAVE_KEY); state = defaultState(); const scene = phaserGame.scene.keys['FieldScene']; if(scene) scene.updatePlantsFromState(); renderAll(); save(); }});
-  document.getElementById('prestigeBtn').addEventListener('click', ()=>prestige());
+}
+function renderJournal(){
+  const body=document.getElementById('journalBody'); body.innerHTML='';
+  PLANTS.forEach(p=>{if(state.unlockedStories[p.id]){const div=document.createElement('div'); div.className='story-entry'; div.innerHTML=`<h5 style="margin:0">${p.icon} ${p.name}</h5><div style="margin-top:6px">“${p.story}”</div>`; body.appendChild(div);}});
+  Object.keys(state.unlockedPollinators).forEach(pid=>{const pol=POLLINATORS.find(p=>p.id===pid); const div=document.createElement('div'); div.className='story-entry'; div.innerHTML=`<h5 style="margin:0">${pol.icon} ${pol.name}</h5><div style="margin-top:6px">“${pol.story}”</div>`; body.appendChild(div);});
+}
+function checkPrestigeAvailability(){const unique=Object.values(state.owned).filter(v=>v>0).length;state.uniquePlants=unique;const btn=document.getElementById('prestigeBtn');btn.disabled=unique<10;btn.className='buy '+(unique>=10?'enabled':'disabled');}
 
-  function renderAll(){ renderResources(); renderShop(); renderJournal(); checkPrestigeAvailability(); }
+// ------------------ Mechanics ------------------
+function scatter(){state.seeds+=1;renderResources();saveThrottled();}
+document.getElementById('scatterBtn').addEventListener('click',scatter);
 
-  // ---------- Boot ----------
-  createPhaser();
-  // small delay to let Phaser init scene
-  setTimeout(()=>{ renderAll(); tryUnlockPollinators(); }, 300);
+function buyPlant(p){
+  if(state.seeds<p.cost)return;
+  state.seeds-=p.cost;
+  state.owned[p.id]=(state.owned[p.id]||0)+1;
+  state.totalPlants+=1;
+  if(!state.unlockedStories[p.id]){state.unlockedStories[p.id]=true;toast('📖 New journal entry unlocked!');}
+  const scene=phaserGame.scene.keys['FieldScene'];
+  if(scene)scene.spawnPlantInstance(p); // only animate new plant
+  renderResources(); renderShop(); renderJournal(); saveThrottled();
+  tryUnlockPollinators();
+  checkPrestigeAvailability();
+}
 
-  // offline progress simple on start
-  (function offlineProgress(){
-    const last = state.lastTick || Date.now();
-    const dt = Math.min(60*60, (Date.now() - last)/1000);
-    state.seeds += seedsPerSecond() * dt;
-    state.lastTick = Date.now();
-    renderResources();
-  })();
+function seedsPerSecond(){let base=0; for(const p of PLANTS){base+=(state.owned[p.id]||0)*p.sps;} return base*state.multiplier;}
+function gameTick(){const now=Date.now();const dt=Math.max(0,(now-state.lastTick)/1000);state.lastTick=now;state.seeds+=seedsPerSecond()*dt;renderResources();}
+setInterval(gameTick,250);
 
-  // ---------- responsive: rebuild Phaser on resize for nicer fit ----------
-  let resizeTimer;
-  window.addEventListener('resize', ()=>{ clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ if(phaserGame){ phaserGame.destroy(true); createPhaser(); setTimeout(()=>{ const scene = phaserGame.scene.keys['FieldScene']; if(scene) scene.updatePlantsFromState(); }, 250); } }, 250); });
+function tryUnlockPollinators(){
+  for(const pol of POLLINATORS){
+    if(state.unlockedPollinators[pol.id]) continue;
+    state.uniquePlants=Object.values(state.owned).filter(v=>v>0).length;
+    if(pol.unlock(state)){
+      state.unlockedPollinators[pol.id]=true;
+      pol.effect(state);
+      const scene=phaserGame.scene.keys['FieldScene'];
+      if(scene) scene.spawnPollinator(pol);
+      toast(`🆕 ${pol.name} has arrived!`);
+      renderJournal(); renderResources(); saveThrottled();
+    }
+  }
+}
 
-  </script>
-</body>
-</html>
+function prestige(){if(Object.values(state.owned).filter(v=>v>0).length<10)return; const biodiversityGain=1; const kept=(state.biodiversity||0)+biodiversityGain; state=defaultState(); state.biodiversity=kept; state.multiplier*=(1+kept*0.1); toast('🌎 You seeded a new land. +1 Biodiversity!'); const scene=phaserGame.scene.keys['FieldScene']; if(scene)scene.updatePlantsFromState(); renderAll(); save();}
+
+// ------------------ Save / Load ------------------
+const SAVE_KEY='roots-of-renewal-phaser-v1';
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state)); state.lastSave=new Date().toISOString(); document.getElementById('
