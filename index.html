@@ -215,3 +215,37 @@ function prestige(){if(Object.values(state.owned).filter(v=>v>0).length<10)retur
 // ------------------ Save / Load ------------------
 const SAVE_KEY='roots-of-renewal-phaser-v1';
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state)); state.lastSave=new Date().toISOString(); document.getElementById('
+saveInfo').textContent=`Last save: ${state.lastSave}`;}catch(e){console.error(e);}
+function load(){try{const s=localStorage.getItem(SAVE_KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
+function saveThrottled(){if(saveThrottled._timer)return;saveThrottled._timer=setTimeout(()=>{save();saveThrottled._timer=null;},500);}
+
+// ------------------ Modals ------------------
+const journalModal=document.getElementById('journalModal');
+document.getElementById('navJournal').addEventListener('click',()=>{renderJournal();journalModal.showModal();});
+document.getElementById('closeJournal').addEventListener('click',()=>journalModal.close());
+
+const menuModal=document.getElementById('menuModal');
+document.getElementById('navMenu').addEventListener('click',()=>menuModal.showModal());
+document.getElementById('closeMenu').addEventListener('click',()=>menuModal.close());
+document.getElementById('prestigeBtn').addEventListener('click',prestige);
+document.getElementById('saveBtn').addEventListener('click',()=>{save();toast('💾 Game saved');});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(confirm('Are you sure you want to reset all progress?')){state=defaultState();const scene=phaserGame.scene.keys['FieldScene'];if(scene)scene.updatePlantsFromState();renderAll();save();}
+});
+
+// ------------------ Render Everything ------------------
+function renderAll(){renderResources();renderShop();renderJournal();checkPrestigeAvailability();}
+
+// ------------------ Initialize ------------------
+window.addEventListener('load',()=>{
+  createPhaser();
+  renderAll();
+  tryUnlockPollinators();
+  save(); // initial save
+});
+
+// ------------------ Handle orientation resize ------------------
+window.addEventListener('resize',()=>{if(phaserGame){phaserGame.scale.resize(Math.max(360,Math.min(window.innerWidth-24,540)),Math.floor(window.innerHeight*0.46));}});
+</script>
+</body>
+</html>
