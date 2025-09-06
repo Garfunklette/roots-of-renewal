@@ -8,61 +8,67 @@ const ITEMS_PER_PAGE = 3;
 const sortedPlants = [...PLANTS].sort((a,b)=>a.name.localeCompare(b.name));
 const sortedPollinators = [...POLLINATORS].sort((a,b)=>a.name.localeCompare(b.name));
 
-// Open the Field Guide modal
+// Month name helper
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function formatMonths(months){
+  if(!months || months.length===0) return "";
+  if(months.length===1) return MONTH_NAMES[months[0]-1];
+  const sorted = months.slice().sort((a,b)=>a-b);
+  return `${MONTH_NAMES[sorted[0]-1]} to ${MONTH_NAMES[sorted[sorted.length-1]-1]}`;
+}
+
+// Open/Close Guide
 function openFieldGuide() {
-  const guide = document.getElementById("fieldGuide");
-  guide.style.display = "block";
+  document.getElementById("fieldGuide").style.display = "block";
   buildFieldGuide();
 }
-
-// Close the Field Guide
 function closeFieldGuide() {
-  const guide = document.getElementById("fieldGuide");
-  guide.style.display = "none";
+  document.getElementById("fieldGuide").style.display = "none";
 }
 
-// Build pages based on current chapter
+// Build guide pages
 function buildFieldGuide() {
   const guideContent = document.getElementById("guideContent");
-  let entries = [];
-
-  if(currentChapter === "plants") {
-    entries = sortedPlants.filter(p => state.plants[p.name] > 0);
-  } else {
-    entries = sortedPollinators.filter(p => state.pollinators[p.name] > 0);
-  }
+  let entries = currentChapter==="plants" 
+    ? sortedPlants.filter(p => state.plants[p.name] > 0)
+    : sortedPollinators.filter(p => state.pollinators[p.name] > 0);
 
   const start = currentPage * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   const pageItems = entries.slice(start, end);
 
-  if(pageItems.length === 0) {
+  if(pageItems.length===0){
     guideContent.innerHTML = "<p>No discoveries yet.</p>";
   } else {
     guideContent.innerHTML = pageItems.map(item=>{
       const isPlant = currentChapter==="plants";
-      let extraInfo = "";
+      let monthDesc = "";
 
       if(isPlant){
-        extraInfo += `<p><em>Bloom months:</em> ${item.bloomMonths.join(", ")}</p>`;
-        if(item.hostFor.length>0) extraInfo += `<p>Host for: ${item.hostFor.join(", ")}</p>`;
-        if(item.foodFor.length>0) extraInfo += `<p>Food source for: ${item.foodFor.join(", ")}</p>`;
-        extraInfo += `<p>Contributes ~${item.squareFootage} ft² per plant.</p>`;
+        // Months, height, spacing lines
+        if(item.bloomMonths && item.bloomMonths.length>0){
+          const formatted = formatMonths(item.bloomMonths);
+          const bloomText = item.bloomMonths.length===1 ? 
+            `Blooms in ${formatted}` : `Blooms from ${formatted}`;
+          monthDesc = `<p><em>${bloomText}</em></p>`;
+        }
+        if(item.height) monthDesc += `<p>Height: ${item.height}</p>`;
+        if(item.spacing) monthDesc += `<p>Spacing: ${item.spacing}</p>`;
       } else {
-        if(item.host) extraInfo += `<p>Requires host: ${item.host}</p>`;
-        if(item.food) extraInfo += `<p>Feeds from: ${item.food}</p>`;
-        extraInfo += `<p>Biodiversity value: ${POLLINATOR_BIODIVERSITY[item.name]||1} pts.</p>`;
+        if(item.host) monthDesc += `<p>Requires host: ${item.host}</p>`;
+        if(item.food) monthDesc += `<p>Feeds from: ${item.food}</p>`;
+        monthDesc += `<p>Biodiversity value: ${POLLINATOR_BIODIVERSITY[item.name]||1} pts.</p>`;
       }
 
       return `
         <div class="entry">
           <h4>${item.name}</h4>
           <p>${item.blurb}</p>
-          ${extraInfo}
+          ${monthDesc}
           <button class="toggleDetailsBtn" onclick="toggleDetails(this)">Reveal Details</button>
           <div class="details" style="display:none;">
             ${isPlant ? 
-              `Cost: ${item.cost}, Growth Rate: ${item.rate || 'N/A'}, Sprout: ${item.sproutMonths.join(", ")}, Seed: ${item.seedMonths.join(", ")}` :
+              `Cost: ${item.cost}, Sprout: ${formatMonths(item.sproutMonths)}, Seed: ${formatMonths(item.seedMonths)}, Square Feet: ${item.squareFootage || 'N/A'}` :
               `Boost: ${item.boost*100}%, Host: ${item.host||"None"}, Food: ${item.food||"Various"}`
             }
           </div>
@@ -71,40 +77,41 @@ function buildFieldGuide() {
     }).join("");
   }
 
-  document.getElementById("pageIndicator").textContent = `Page ${currentPage+1} of ${Math.max(1, Math.ceil(entries.length/ITEMS_PER_PAGE))}`;
+  const totalPages = Math.max(1, Math.ceil(entries.length / ITEMS_PER_PAGE));
+  document.getElementById("pageIndicator").textContent = `Page ${currentPage+1} of ${totalPages}`;
 }
 
 // Chapter buttons
-document.getElementById("plantsTab").addEventListener("click",()=>{
+document.getElementById("plantsTab").addEventListener("click", ()=>{
   currentChapter="plants"; currentPage=0; buildFieldGuide();
 });
-document.getElementById("pollinatorsTab").addEventListener("click",()=>{
+document.getElementById("pollinatorsTab").addEventListener("click", ()=>{
   currentChapter="pollinators"; currentPage=0; buildFieldGuide();
 });
 
-// Navigation arrows
-document.getElementById("prevPage").addEventListener("click",()=>{
+// Page navigation
+document.getElementById("prevPage").addEventListener("click", ()=>{
   if(currentPage>0) currentPage--; buildFieldGuide();
 });
-document.getElementById("nextPage").addEventListener("click",()=>{
+document.getElementById("nextPage").addEventListener("click", ()=>{
   currentPage++; buildFieldGuide();
 });
 
 // Toggle inline details
 function toggleDetails(button){
   const detailsDiv = button.nextElementSibling;
-  if(detailsDiv.style.display === "none"){
-    detailsDiv.style.display = "block";
-    button.textContent = "Hide Details";
+  if(detailsDiv.style.display==="none"){
+    detailsDiv.style.display="block";
+    button.textContent="Hide Details";
   } else {
-    detailsDiv.style.display = "none";
-    button.textContent = "Reveal Details";
+    detailsDiv.style.display="none";
+    button.textContent="Reveal Details";
   }
 }
 
-// Discovery popup with blurb snippet
-function showDiscoveryPopup(name, type) {
-  let blurb = "";
+// Discovery popup
+function showDiscoveryPopup(name,type){
+  let blurb="";
   if(type==="plant"){
     const plant = PLANTS.find(p=>p.name===name);
     if(plant && plant.blurb) blurb = plant.blurb.split(".")[0]+".";
@@ -114,19 +121,18 @@ function showDiscoveryPopup(name, type) {
   }
 
   const popup = document.createElement("div");
-  popup.className = "discoveryPopup";
-  popup.innerHTML = `
+  popup.className="discoveryPopup";
+  popup.innerHTML=`
     <h3>📖 New Entry Discovered!</h3>
     <p><strong>${name}</strong> (${type === "plant" ? "Plant" : "Pollinator"})</p>
     <p><em>${blurb}</em></p>
     <button onclick="this.parentElement.remove()">Close</button>
   `;
   document.body.appendChild(popup);
-
   setTimeout(()=>popup.remove(),6000);
 }
 
-// Hooks for adding new plants/pollinators with discovery
+// Hooks for adding new species
 function addPlant(name){
   if(!state.plants[name]) state.plants[name]=0;
   state.plants[name]++;
@@ -145,6 +151,6 @@ function addPollinator(name){
     state.discoveredPollinators.add(name);
     showDiscoveryPopup(name,"pollinator");
   }
-  buildFieldGuide(); // refresh guide if open
+  buildFieldGuide();
   updateUI();
 }
