@@ -3,9 +3,10 @@
 // Initialize game state
 const state = {
   seeds: 10,
-  plants: {},
-  pollinators: {},
-  stewardshipPoints: 0,
+  plants: {}, // { "Milkweed": 3, "Blazing Star": 5 }
+  pollinators: {}, // { "Monarch": 1, "Bumblebee": 2 }
+  prestigeLevel: 0,
+  globalImpactPoints: 0,
   discoveredPlants: new Set(),
   discoveredPollinators: new Set()
 };
