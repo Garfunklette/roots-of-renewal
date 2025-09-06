@@ -1,38 +1,58 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roots of Renewal</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-  <h1>🌱 Roots of Renewal</h1>
-  <div class="resources">
-    <div class="pill">🌱 Seeds: <span id="seeds">0</span></div>
-    <div class="pill">🌿 Plants: <span id="plants">0</span></div>
-    <div class="pill">🐝 Pollinators: <span id="pollinators">0</span></div>
-    <div class="pill">🤲 Stewardship: <span id="stewardship">0</span></div>
-    <div class="pill">🧬 Diversity: <span id="div">1.0</span>x</div>
-    <div class="pill">📚 Eco Knowledge: <span id="eco">0</span>x</div>
-    <div class="pill">🏞️ Restored: <span id="restored">0</span> sq ft</div>
-  </div>
-</header>
+  <h1>Roots of Renewal 🌱</h1>
 
-<main>
-  <button id="scatterBtn">Scatter Seeds 🌱 +1</button>
+  <div id="stats">
+    <p>Seeds: <span id="seeds">0</span></p>
+    <p>Stewardship Points: <span id="stewardship">0</span></p>
+    <p>Restored Area: <span id="restored">0</span></p>
+    <p>Prestige/Eco Knowledge: <span id="ecoKnowledge">0</span></p>
+  </div>
+
+  <button id="scatter">Scatter Seeds</button>
+  <button id="prestige">Prestige / Rewild</button>
+  <button id="toggleKnowledge">🔍 Show Knowledge Details</button>
+  <button id="guideBtn">📖 Field Guide</button>
+
   <div id="plantCounts"></div>
   <div id="pollinatorCounts"></div>
-  <div class="shop" id="shopBody"></div>
-  <button id="prestigeBtn">Rewild Land (Prestige)</button>
-  <div id="prestigeReport"></div>
-  <div id="journal">
-    <h3>📓 Field Notes</h3>
-    <div id="entries"></div>
-  </div>
-</main>
+  <div id="entries" class="journal"></div>
 
-<script src="game.js"></script>
+  <!-- Restoration Stats -->
+  <div id="restorationStats">
+    <h2>🌳 Restoration Stats</h2>
+    <p>Square Footage Restored: <span id="squareFootage">0</span> ft²</p>
+    <p>Biodiversity Score: <span id="biodiversityScore">0</span></p>
+
+    <table id="restorationTable" border="1">
+      <thead>
+        <tr>
+          <th>Species</th>
+          <th>Type</th>
+          <th>Initial Count</th>
+          <th>Current Count</th>
+          <th>Square Footage / Points</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Field Guide Modal -->
+  <div id="fieldGuide" class="hidden">
+    <h2>📖 Field Guide</h2>
+    <div id="guidePlants"><h3>🌿 Plants</h3></div>
+    <div id="guidePollinators"><h3>🐝 Pollinators</h3></div>
+    <button id="closeGuide">Close</button>
+  </div>
+
+  <script src="game.js"></script>
 </body>
 </html>
