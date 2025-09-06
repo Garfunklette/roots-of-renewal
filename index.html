@@ -5,68 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roots of Renewal</title>
 <link rel="stylesheet" href="styles.css">
-  <script src="speciesData.js"></script>
-<script src="game.js"></script>
-<script src="fieldGuide.js"></script>
 </head>
 <body>
-  <h1>Roots of Renewal 🌱</h1>
-
-  <div id="stats">
-    <p>Seeds: <span id="seeds">0</span></p>
-    <p>Stewardship Points: <span id="stewardship">0</span></p>
-    <p>Restored Area: <span id="restored">0</span></p>
-    <p>Prestige/Eco Knowledge: <span id="ecoKnowledge">0</span></p>
+  <div>
+    <p>Seeds: <span id="seedCount">10</span></p>
+    <p>Stewardship Points: <span id="stewardshipPoints">0</span></p>
+    <button onclick="openFieldGuide()">Open Field Guide</button>
   </div>
-
-  <button id="scatter">Scatter Seeds</button>
-  <button id="prestige">Prestige / Rewild</button>
-  <button id="toggleKnowledge">🔍 Show Knowledge Details</button>
-  <button id="guideBtn">📖 Field Guide</button>
-
-  <div id="plantCounts"></div>
-  <div id="pollinatorCounts"></div>
-  <div id="entries" class="journal"></div>
-
-  <!-- Restoration Stats -->
-  <div id="restorationStats">
-    <h2>🌳 Restoration Stats</h2>
-    <p>Square Footage Restored: <span id="squareFootage">0</span> ft²</p>
-    <p>Biodiversity Score: <span id="biodiversityScore">0</span></p>
-
-    <table id="restorationTable" border="1">
-      <thead>
-        <tr>
-          <th>Species</th>
-          <th>Type</th>
-          <th>Initial Count</th>
-          <th>Current Count</th>
-          <th>Square Footage / Points</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- Field Guide Modal -->
-  l
 
   <div id="fieldGuide" class="hidden">
-  <h2>📖 Field Guide</h2>
-  <div class="chapter-tabs">
-    <button id="plantsTab">🌿 Plants</button>
-    <button id="pollinatorsTab">🐝 Pollinators</button>
+    <h2>📖 Field Guide</h2>
+    <div class="chapter-tabs">
+      <button id="plantsTab">🌿 Plants</button>
+      <button id="pollinatorsTab">🐝 Pollinators</button>
+    </div>
+    <div id="guideContent"></div>
+    <div class="page-controls">
+      <button id="prevPage">⬅️ Prev</button>
+      <span id="pageIndicator">Page 1</span>
+      <button id="nextPage">➡️ Next</button>
+    </div>
+    <button id="closeGuide" onclick="closeFieldGuide()">Close</button>
   </div>
-  <div id="guideContent"></div>
-  <div class="page-controls">
-    <button id="prevPage">⬅️ Prev</button>
-    <span id="pageIndicator">Page 1</span>
-    <button id="nextPage">➡️ Next</button>
-  </div>
-  <button id="closeGuide" onclick="closeFieldGuide()">Close</button>
-  </div>
-  
 
-  
+  <script src="speciesData.js"></script>
+  <script src="game.js"></script>
+  <script src="fieldGuide.js"></script>
 </body>
 </html>
