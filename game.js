@@ -7,10 +7,19 @@ let state = {
   ecoKnowledge: 0,
   restored: 0,
   newSprouts: [],
-  month: 0 // 0 = January
+  month: 0
 };
 let tick = 0;
 let firstPlantPurchased = false, firstAutoPlantLogged = false;
+
+// --- Toggles ---
+let showKnowledge = false;
+
+// --- Field Guide / Discoveries (persistent across prestige) ---
+let discoveries = {
+  plants: {},
+  pollinators: {}
+};
 
 // --- Months ---
 const MONTHS = [
@@ -18,29 +27,11 @@ const MONTHS = [
   "July","August","September","October","November","December"
 ];
 
-// --- Plants (with seasonal phases) ---
+// --- Plants ---
 const PLANTS = [
-  {
-    name:"Milkweed", cost:5, rate:1,
-    sproutMonths:[4,5], // April–May
-    bloomMonths:[6,7,8], // June–Aug
-    seedMonths:[9,10], // Sept–Oct
-    hostFor:["Monarch"], foodFor:["Monarch"]
-  },
-  {
-    name:"Purple Coneflower", cost:8, rate:2,
-    sproutMonths:[5,6],
-    bloomMonths:[7,8],
-    seedMonths:[9],
-    hostFor:[], foodFor:["Bee","Butterfly"]
-  },
-  {
-    name:"Goldenrod", cost:10, rate:3,
-    sproutMonths:[4,5],
-    bloomMonths:[8,9],
-    seedMonths:[10],
-    hostFor:[], foodFor:["Bee","Butterfly","Moth"]
-  }
+  { name:"Milkweed", cost:5, rate:1, sproutMonths:[4,5], bloomMonths:[6,7,8], seedMonths:[9,10], hostFor:["Monarch"], foodFor:["Monarch"] },
+  { name:"Purple Coneflower", cost:8, rate:2, sproutMonths:[5,6], bloomMonths:[7,8], seedMonths:[9], hostFor:[], foodFor:["Bee","Butterfly"] },
+  { name:"Goldenrod", cost:10, rate:3, sproutMonths:[4,5], bloomMonths:[8,9], seedMonths:[10], hostFor:[], foodFor:["Bee","Butterfly","Moth"] }
 ];
 
 // --- Pollinators ---
@@ -51,14 +42,7 @@ const POLLINATORS = [
   { name:"Moth", host:null, food:"Goldenrod", boost:0.1 }
 ];
 
-// --- Landmarks ---
-const LANDMARKS = [
-  {threshold:10,text:"A small patch of green emerges."},
-  {threshold:100,text:"The land buzzes with life."},
-  {threshold:1000,text:"A thriving ecosystem flourishes!"}
-];
-
-// --- Utility: weighted plant choice (prefers cheaper) ---
+// --- Utility: weighted plant choice ---
 function choosePlantByWeight(plants){
   if(plants.length===0) return null;
   let total=0;
@@ -87,6 +71,13 @@ function buyPlant(plant){
   if(state.seeds>=plant.cost){
     state.seeds-=plant.cost;
     state.plants[plant.name]=(state.plants[plant.name]||0)+1;
+
+    // Discover plant in Field Guide
+    if(!discoveries.plants[plant.name]){
+      discoveries.plants[plant.name] = {seen:true, sprout:false, bloom:false, seed:false, host:false, food:false};
+      logEntry(`📖 Field Guide updated: ${plant.name} added.`);
+    }
+
     if(!firstPlantPurchased){
       logEntry(`🌱 First planting: ${plant.name}. The journal begins.`);
       firstPlantPurchased=true;
@@ -95,7 +86,7 @@ function buyPlant(plant){
   }
 }
 
-// --- Pollinator Arrival (scaled by host/food plant counts) ---
+// --- Pollinator Arrival ---
 function checkPollinators(){
   POLLINATORS.forEach(pol=>{
     const hostCount=pol.host?(state.plants[pol.host]||0):1;
@@ -106,6 +97,11 @@ function checkPollinators(){
       const probability=(hostCount+foodCount)*0.01;
       if(Math.random()<probability){
         state.pollinators[pol.name]=currentCount+1;
+
+        // Discover pollinator
+        if(!discoveries.pollinators[pol.name]){
+          discoveries.pollinators[pol.name]={seen:true, host:false, food:false, boost:false};
+        }
         logEntry(`🐝 ${pol.name} has arrived!`);
       }
     }
@@ -132,129 +128,189 @@ function renderPlantCounts(){
   PLANTS.forEach(plant=>{
     const count=state.plants[plant.name]||0;
     if(count>0){
-      const d=document.createElement("div");
-      d.textContent=`${plant.name}: ${count}`;
-      if(state.newSprouts.includes(plant.name)) d.classList.add("new-sprout");
-      div.appendChild(d);
+      const d=discoveries.plants[plant.name];
+      let bonusText="";
+      if(showKnowledge && d){
+        let bonus=0;
+        if(d.sprout) bonus+=10;
+        if(d.bloom) bonus+=10;
+        if(d.seed) bonus+=10;
+        if(d.host) bonus+=10;
+        if(d.food) bonus+=10;
+        bonusText=` (+${bonus}% Knowledge)`;
+      }
+      const row=document.createElement("div");
+      row.textContent=`${plant.name}: ${count}${bonusText}`;
+      if(state.newSprouts.includes(plant.name)) row.classList.add("new-sprout");
+      div.appendChild(row);
     }
   });
   state.newSprouts=[];
 }
+
 function renderPollinatorCounts(){
   const div=document.getElementById("pollinatorCounts");
   div.innerHTML="<h3>🐝 Pollinators</h3>";
   POLLINATORS.forEach(pol=>{
     const count=state.pollinators[pol.name]||0;
     if(count>0){
-      const d=document.createElement("div");
-      d.textContent=`${pol.name}: ${count}`;
-      if(count>0) d.classList.add("new-pollinator");
-      div.appendChild(d);
+      const d=discoveries.pollinators[pol.name];
+      let bonusText="";
+      if(showKnowledge && d){
+        if(d.boost){
+          bonusText = ` (Full +${Math.round(pol.boost*100)}%)`;
+        } else {
+          bonusText = ` (Partial +${Math.round(pol.boost*50)}%)`;
+        }
+      }
+      const row=document.createElement("div");
+      row.textContent=`${pol.name}: ${count}${bonusText}`;
+      if(count>0) row.classList.add("new-pollinator");
+      div.appendChild(row);
     }
   });
 }
+
 function renderShop(){
   const shop=document.getElementById("shopBody");
   shop.innerHTML="<h3>Plant Shop</h3>";
   PLANTS.forEach(p=>{
+    const d = discoveries.plants[p.name];
+    let bonusText="";
+    if(showKnowledge && d){
+      let bonus=0;
+      if(d.sprout) bonus+=10;
+      if(d.bloom) bonus+=10;
+      if(d.seed) bonus+=10;
+      if(d.host) bonus+=10;
+      if(d.food) bonus+=10;
+      bonusText=` (+${bonus}% Knowledge)`;
+    }
     const btn=document.createElement("button");
-    btn.textContent=`Buy ${p.name} (${p.cost} seeds)`;
+    btn.textContent=`Buy ${p.name} (${p.cost} seeds)${bonusText}`;
     btn.addEventListener("click",()=>buyPlant(p));
     shop.appendChild(btn);
   });
 }
-function render(){
-  const totalPlants=Object.values(state.plants).reduce((a,b)=>a+b,0);
-  const uniquePlants=Object.keys(state.plants).filter(p=>state.plants[p]>0).length;
-  const diversityMult=1+(uniquePlants-1)*0.1;
 
-  let pollinatorBoost=1;
-  POLLINATORS.forEach(pol=>{
-    const count=state.pollinators[pol.name]||0;
-    if(count>0){
-      const foodPlant=PLANTS.find(p=>p.foodFor.includes(pol.name));
-      if(foodPlant && foodPlant.bloomMonths.includes(state.month)){
-        pollinatorBoost+=pol.boost*count;
-      }
+function renderFieldGuide(){
+  const gp=document.getElementById("guidePlants");
+  gp.innerHTML="<h3>🌿 Plants</h3>";
+  PLANTS.forEach(p=>{
+    const d = discoveries.plants[p.name];
+    const div=document.createElement("div");
+    if(d?.seen){
+      div.innerHTML=`<b>${p.name}</b><br>`;
+      if(d.sprout) div.innerHTML+=`Sprout: ${p.sproutMonths.map(m=>MONTHS[m]).join(", ")}<br>`;
+      if(d.bloom) div.innerHTML+=`Bloom: ${p.bloomMonths.map(m=>MONTHS[m]).join(", ")}<br>`;
+      if(d.seed) div.innerHTML+=`Seed: ${p.seedMonths.map(m=>MONTHS[m]).join(", ")}<br>`;
+      if(d.host) div.innerHTML+=`Host for: ${p.hostFor.length?p.hostFor.join(", "):"—"}<br>`;
+      if(d.food) div.innerHTML+=`Food for: ${p.foodFor.length?p.foodFor.join(", "):"—"}`;
+    } else {
+      div.textContent="???";
     }
+    gp.appendChild(div);
   });
 
-  document.getElementById("seeds").textContent=state.seeds;
-  document.getElementById("plants").textContent=totalPlants;
-  document.getElementById("pollinators").textContent=Object.keys(state.pollinators).filter(k=>state.pollinators[k]>0).length;
-  document.getElementById("stewardship").textContent=Math.floor(state.stewardship);
-  document.getElementById("div").textContent=diversityMult.toFixed(1);
-  document.getElementById("eco").textContent=state.ecoKnowledge;
-  document.getElementById("restored").textContent=state.restored;
-  document.getElementById("month").textContent=MONTHS[state.month];
+  const gpol=document.getElementById("guidePollinators");
+  gpol.innerHTML="<h3>🐝 Pollinators</h3>";
+  POLLINATORS.forEach(pol=>{
+    const d = discoveries.pollinators[pol.name];
+    const div=document.createElement("div");
+    if(d?.seen){
+      div.innerHTML=`<b>${pol.name}</b><br>`;
+      if(d.host && pol.host) div.innerHTML+=`Host plant: ${pol.host}<br>`;
+      if(d.food && pol.food) div.innerHTML+=`Food plant: ${pol.food}<br>`;
+      if(d.boost) div.innerHTML+=`Boost observed`;
+    } else {
+      div.textContent="???";
+    }
+    gpol.appendChild(div);
+  });
+}
 
+function render(){
   renderPlantCounts();
   renderPollinatorCounts();
   renderShop();
 }
 
-// --- Growth Loop ---
-setInterval(()=>{
+// --- Game Tick: Seeds → Plants, Pollinators Arrival, Field Updates ---
+function gameTick(){
   tick++;
+  state.month = tick % 12; // simple month cycle
 
-  // Advance month every 5 ticks
-  if(tick % 5===0){
-    state.month=(state.month+1)%12;
-    logEntry(`📅 It is now ${MONTHS[state.month]}.`);
-  }
+  // Plants producing seeds
+  let plantSeedGain = 0;
+  PLANTS.forEach(plant => {
+    const count = state.plants[plant.name] || 0;
+    if(count>0 && plant.seedMonths.includes(state.month)){
+      let rate = plant.rate;
+      const d = discoveries.plants[plant.name];
+      if(d){
+        let bonus=0;
+        if(d.sprout) bonus+=0.1;
+        if(d.bloom) bonus+=0.1;
+        if(d.seed) bonus+=0.1;
+        if(d.host) bonus+=0.1;
+        if(d.food) bonus+=0.1;
+        rate *= 1 + bonus;
+      }
+      plantSeedGain += count * rate;
+      // Update sprout/bloom/seed discoveries if month reached
+      if(d && !d.sprout && plant.sproutMonths.includes(state.month)) d.sprout=true;
+      if(d && !d.bloom && plant.bloomMonths.includes(state.month)) d.bloom=true;
+      if(d && !d.seed && plant.seedMonths.includes(state.month)) d.seed=true;
+    }
+  });
+  state.seeds += plantSeedGain;
 
-  // Pollinators check
+  // Pollinator boost (scaled by knowledge)
+  let pollinatorBoost = 1;
+  POLLINATORS.forEach(pol => {
+    const count = state.pollinators[pol.name] || 0;
+    if(count>0){
+      const d = discoveries.pollinators[pol.name];
+      let boost = pol.boost;
+      if(!d?.boost) boost *= 0.5; // partial boost if not fully observed
+      const foodPlant = PLANTS.find(p => p.foodFor.includes(pol.name));
+      if(foodPlant && foodPlant.bloomMonths.includes(state.month)){
+        pollinatorBoost += boost*count;
+        if(d && !d.boost) d.boost = true; // mark boost as observed
+        if(d && !d.food && foodPlant) d.food = true; // record food plant observed
+      }
+      if(d && !d.host && pol.host && (state.plants[pol.host] || 0)>0) d.host = true; // record host plant observed
+    }
+  });
+
+  state.seeds *= pollinatorBoost;
+
+  // Check for new pollinator arrivals
   checkPollinators();
 
-  // Seed production only in seedMonths
-  let plantSeedGain=0;
-  PLANTS.forEach(plant=>{
-    const count=state.plants[plant.name]||0;
-    if(plant.seedMonths.includes(state.month)){
-      plantSeedGain+=count*plant.rate;
-    }
-  });
-  state.seeds+=plantSeedGain;
-
-  // Seed → Plant conversion only in sproutMonths
-  if(state.seeds>0){
-    const available=PLANTS.filter(p=>p.sproutMonths.includes(state.month));
-    const chosen=choosePlantByWeight(available);
-    if(chosen){
-      state.plants[chosen.name]=(state.plants[chosen.name]||0)+1;
-      state.seeds--;
-      state.newSprouts.push(chosen.name);
-      if(!firstAutoPlantLogged){
-        logEntry(`🌿 A wild ${chosen.name} sprouts naturally.`);
-        firstAutoPlantLogged=true;
-      }
-    }
-  }
-
-  // Diversity + pollinator boost
-  const uniquePlants=Object.keys(state.plants).filter(p=>state.plants[p]>0).length;
-  const diversityMult=1+(uniquePlants-1)*0.1;
-
-  let pollinatorBoost=1;
-  POLLINATORS.forEach(pol=>{
-    const count=state.pollinators[pol.name]||0;
-    if(count>0){
-      const foodPlant=PLANTS.find(p=>p.foodFor.includes(pol.name));
-      if(foodPlant && foodPlant.bloomMonths.includes(state.month)){
-        pollinatorBoost+=pol.boost*count;
-      }
-    }
-  });
-
-  const prestigeMult=1+state.ecoKnowledge*0.5;
-  state.stewardship+=(uniquePlants*0.2+pollinatorBoost-1)*prestigeMult;
-
   render();
-},2000);
+}
 
-// --- Events ---
-document.getElementById("scatterBtn").addEventListener("click",scatter);
-document.getElementById("prestigeBtn").addEventListener("click",prestige);
+// --- Button Listeners ---
+document.getElementById("scatter").addEventListener("click", scatter);
+document.getElementById("prestige").addEventListener("click", prestige);
+document.getElementById("toggleKnowledge").addEventListener("click", ()=>{
+  showKnowledge = !showKnowledge;
+  document.getElementById("toggleKnowledge").textContent = showKnowledge
+    ? "🔍 Hide Knowledge Details"
+    : "🔍 Show Knowledge Details";
+  render();
+});
 
-// --- Init ---
+document.getElementById("guideBtn").addEventListener("click", ()=>{
+  document.getElementById("fieldGuide").classList.remove("hidden");
+  renderFieldGuide();
+});
+
+document.getElementById("closeGuide").addEventListener("click", ()=>{
+  document.getElementById("fieldGuide").classList.add("hidden");
+});
+
+// --- Start Game Loop ---
+setInterval(gameTick, 2000); // every 2 sec
 render();
