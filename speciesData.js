@@ -1,11 +1,12 @@
 // speciesData.js
 
-// PLANTS
 const PLANTS = [
   {
     name: "Milkweed",
     cost: 10,
     squareFootage: 5,
+    height: "2–5 ft",
+    spacing: "12–18 in",
     bloomMonths: [6,7,8],
     sproutMonths: [5],
     seedMonths: [9],
@@ -17,6 +18,8 @@ const PLANTS = [
     name: "Purple Coneflower",
     cost: 15,
     squareFootage: 4,
+    height: "2–4 ft",
+    spacing: "12–18 in",
     bloomMonths: [7,8,9],
     sproutMonths: [5],
     seedMonths: [10],
@@ -28,6 +31,8 @@ const PLANTS = [
     name: "Little Bluestem",
     cost: 12,
     squareFootage: 6,
+    height: "2–4 ft",
+    spacing: "6–12 in",
     bloomMonths: [8,9],
     sproutMonths: [5],
     seedMonths: [10],
@@ -39,6 +44,8 @@ const PLANTS = [
     name: "Bee Balm",
     cost: 18,
     squareFootage: 3,
+    height: "2–3 ft",
+    spacing: "18–24 in",
     bloomMonths: [7,8],
     sproutMonths: [5],
     seedMonths: [9],
@@ -50,6 +57,8 @@ const PLANTS = [
     name: "Black-eyed Susan",
     cost: 8,
     squareFootage: 3,
+    height: "2–3 ft",
+    spacing: "12–18 in",
     bloomMonths: [6,7,8,9],
     sproutMonths: [5],
     seedMonths: [10],
@@ -61,6 +70,8 @@ const PLANTS = [
     name: "Cardinal Flower",
     cost: 20,
     squareFootage: 2,
+    height: "3–5 ft",
+    spacing: "12–18 in",
     bloomMonths: [7,8,9],
     sproutMonths: [5],
     seedMonths: [10],
@@ -70,7 +81,7 @@ const PLANTS = [
   }
 ];
 
-// POLLINATORS
+// POLLINATORS remain unchanged
 const POLLINATORS = [
   {
     name: "Monarch Butterfly",
@@ -116,7 +127,6 @@ const POLLINATORS = [
   }
 ];
 
-// Optional: biodiversity values for pollinators
 const POLLINATOR_BIODIVERSITY = {
   "Monarch Butterfly": 5,
   "Bumblebee": 4,
