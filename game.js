@@ -1,220 +1,212 @@
+// --- Game State ---
+let state = {
+  seeds: 0,
+  stewardship: 0,
+  restored: 0,
+  ecoKnowledge: 0,
+  plants: {},
+  pollinators: {},
+  month: 0,
+  newSprouts: []
+};
 
-// --- State ---
-let state={seeds:0,plants:{},pollinators:{},stewardship:0,ecoKnowledge:0,restored:0,newSprouts:[]};
-let firstPlantPurchased=false, firstAutoPlantLogged=false;
+let tick = 0;
+let showKnowledge = false;
+let discoveries = { plants: {}, pollinators: {} };
+let initialCounts = {};
 
-// --- Plants & Pollinators ---
-const PLANTS=[
-  {name:"Purple Coneflower", cost:10, rate:1},
-  {name:"Butterfly Milkweed", cost:30, rate:3},
-  {name:"Little Bluestem", cost:60, rate:5},
-  {name:"Prairie Blazing Star", cost:120, rate:10},
-  {name:"White Wild Indigo", cost:50, rate:4},
-  {name:"Rattlesnake Master", cost:80, rate:6},
-  {name:"Hoary Vervain", cost:40, rate:3},
-  {name:"Leadplant", cost:90, rate:7},
-  {name:"Smooth Aster", cost:70, rate:5}
+// --- PLANTS ---
+const PLANTS = [
+  { name:"Milkweed", cost:5, rate:1, sproutMonths:[4,5], bloomMonths:[6,7,8], seedMonths:[9,10], hostFor:["Monarch"], foodFor:["Monarch"], squareFootage:4 },
+  { name:"Purple Coneflower", cost:8, rate:2, sproutMonths:[5,6], bloomMonths:[7,8], seedMonths:[9], hostFor:[], foodFor:["Bee","Butterfly"], squareFootage:6 },
+  { name:"Goldenrod", cost:10, rate:3, sproutMonths:[4,5], bloomMonths:[8,9], seedMonths:[10], hostFor:[], foodFor:["Bee","Butterfly","Moth"], squareFootage:8 },
+  { name:"Black-eyed Susan", cost:7, rate:2, sproutMonths:[5,6], bloomMonths:[7,8], seedMonths:[9], hostFor:[], foodFor:["Bee","Butterfly"], squareFootage:6 },
+  { name:"Butterfly Weed", cost:8, rate:2, sproutMonths:[4,5], bloomMonths:[6,7], seedMonths:[8,9], hostFor:["Monarch"], foodFor:["Monarch","Bee"], squareFootage:5 },
+  { name:"Cardinal Flower", cost:9, rate:2, sproutMonths:[5], bloomMonths:[7,8], seedMonths:[9], hostFor:["Hummingbird"], foodFor:["Hummingbird"], squareFootage:5 },
+  { name:"Wild Bergamot", cost:6, rate:1, sproutMonths:[5], bloomMonths:[6,7], seedMonths:[8], hostFor:[], foodFor:["Bee","Butterfly"], squareFootage:6 },
+  { name:"Golden Alexanders", cost:5, rate:1, sproutMonths:[4,5], bloomMonths:[6], seedMonths:[7], hostFor:[], foodFor:["Bee"], squareFootage:4 },
+  { name:"Prairie Blazing Star", cost:10, rate:3, sproutMonths:[5], bloomMonths:[7,8], seedMonths:[9], hostFor:[], foodFor:["Bee","Butterfly"], squareFootage:8 },
+  { name:"New England Aster", cost:7, rate:2, sproutMonths:[6], bloomMonths:[8,9], seedMonths:[10], hostFor:[], foodFor:["Bee","Butterfly"], squareFootage:6 },
+  { name:"Showy Milkweed", cost:8, rate:2, sproutMonths:[4,5], bloomMonths:[6,7], seedMonths:[8,9], hostFor:["Monarch"], foodFor:["Monarch"], squareFootage:5 }
 ];
-const POLLINATORS=[
-  {name:"Monarch Butterfly", boost:0.2, host:"Butterfly Milkweed", food:"Prairie Blazing Star"},
-  {name:"Rusty Patched Bumblebee", boost:0.4, host:"Purple Coneflower", food:"Prairie Blazing Star"},
-  {name:"Hummingbird Clearwing Moth", boost:0.6, host:"Little Bluestem", food:"Butterfly Milkweed"},
-  {name:"Eastern Swallowtail", boost:0.3, host:"White Wild Indigo", food:"Hoary Vervain"},
-  {name:"Honeybee", boost:0.5, host:"Leadplant", food:"Prairie Blazing Star"},
-  {name:"Bumblebee", boost:0.4, host:"Rattlesnake Master", food:"Smooth Aster"},
-  {name:"Mason Bee", boost:0.2, host:"Hoary Vervain", food:"Little Bluestem"}
+
+// --- POLLINATORS ---
+const POLLINATORS = [
+  { name:"Monarch", host:"Milkweed", food:"Milkweed", boost:0.2 },
+  { name:"Bee", host:null, food:"Purple Coneflower", boost:0.1 },
+  { name:"Butterfly", host:null, food:"Purple Coneflower", boost:0.1 },
+  { name:"Moth", host:null, food:"Goldenrod", boost:0.1 },
+  { name:"Bumblebee", host:null, food:"Wild Bergamot", boost:0.1 },
+  { name:"Hummingbird", host:"Cardinal Flower", food:"Cardinal Flower", boost:0.15 },
+  { name:"Swallowtail", host:null, food:"Black-eyed Susan", boost:0.1 },
+  { name:"Honeybee", host:null, food:"Butterfly Weed", boost:0.1 },
+  { name:"Moth (Luna)", host:null, food:"New England Aster", boost:0.05 },
+  { name:"Native Wasp", host:null, food:"Golden Alexanders", boost:0.05 }
 ];
-const LANDMARKS=[{size:100,label:"a backyard garden"},{size:1000,label:"a community park"},{size:10000,label:"a small prairie"},{size:100000,label:"a nature reserve"},{size:1000000,label:"a national park"}];
 
-// --- Colors ---
-const PLANT_COLORS={"Purple Coneflower":"#9b59b6","Butterfly Milkweed":"#e67e22","Little Bluestem":"#3498db","Prairie Blazing Star":"#e74c3c","White Wild Indigo":"#2ecc71","Rattlesnake Master":"#16a085","Hoary Vervain":"#8e44ad","Leadplant":"#f1c40f","Smooth Aster":"#d35400"};
-const POLLINATOR_COLORS={"Monarch Butterfly":"#f39c12","Rusty Patched Bumblebee":"#d35400","Hummingbird Clearwing Moth":"#2ecc71","Eastern Swallowtail":"#9b59b6","Honeybee":"#f1c40f","Bumblebee":"#e74c3c","Mason Bee":"#3498db"};
-const JOURNAL_COLORS={...PLANT_COLORS,...POLLINATOR_COLORS};
+const POLLINATOR_BIODIVERSITY = {
+  "Monarch":10,"Bee":5,"Butterfly":5,"Moth":3,"Bumblebee":5,
+  "Hummingbird":10,"Swallowtail":5,"Honeybee":5,"Moth (Luna)":3,"Native Wasp":2
+};
 
-// --- Journal ---
-function logEntry(text,species){
-  const entries=document.getElementById("entries");
-  const div=document.createElement("div");
-  div.className="entry";
-  div.textContent=text;
-  if(species && JOURNAL_COLORS[species]){div.style.color=JOURNAL_COLORS[species]; div.style.fontWeight="bold";}
-  entries.appendChild(div);
-  entries.scrollTop=entries.scrollHeight;
+// --- INITIALIZATION ---
+function initInitialCounts(){
+  initialCounts = {};
+  PLANTS.forEach(p=>{ initialCounts[p.name] = state.plants[p.name] || 0; });
 }
 
-// --- Scatter Seeds ---
-function scatter(){ state.seeds+=1; render(); }
-
-// --- Buy Plant ---
-function buyPlant(plant){
-  if(state.seeds>=plant.cost){
-    state.seeds-=plant.cost;
-    state.plants[plant.name]=(state.plants[plant.name]||0)+1;
-    if(!firstPlantPurchased){
-      logEntry(`🌿 You planted your first ${plant.name}! Life is beginning to take hold.`, plant.name);
-      firstPlantPurchased=true;
-    }
-    render();
-  }
-}
-
-// --- Pollinator Check (Scaled by host/food counts) ---
-function checkPollinators(){
-  POLLINATORS.forEach(pol=>{
-    const hostCount=state.plants[pol.host]||0;
-    const foodCount=state.plants[pol.food]||0;
-    const maxAllowed=Math.min(hostCount,foodCount);
-    const currentCount=state.pollinators[pol.name]||0;
-    if(currentCount<maxAllowed){
-      const probability=(hostCount+foodCount)/20;
-      if(Math.random()<probability){
-        state.pollinators[pol.name]=currentCount+1;
-        logEntry(`🐝 ${pol.name} has arrived!`, pol.name);
-        const pollDivs=document.getElementById("pollinatorCounts").children;
-        for(let d of pollDivs){ if(d.textContent.includes(pol.name)){ d.classList.add("new-pollinator"); }}
-      }
-    }
-  });
-}
-
-// --- Weighted Random Plant Selection ---
-function choosePlantByWeight(plants){
-  let totalWeight=plants.reduce((sum,p)=>sum+(1/p.cost),0);
-  let rand=Math.random()*totalWeight;
-  for(let plant of plants){ rand-=(1/plant.cost); if(rand<=0) return plant; }
-  return plants[plants.length-1];
-}
-
-// --- Prestige / Rewild ---
-function prestige(){
-  let addedRestored=Math.floor(state.stewardship*2+Object.values(state.plants).reduce((a,b)=>a+b,0)*5);
-  state.restored+=addedRestored;
-  state.ecoKnowledge+=1;
-  let comparison=LANDMARKS.reduce((acc,mark)=>{if(state.restored>=mark.size) acc=mark.label; return acc;}, "a patch of wildflowers");
-  document.getElementById("prestigeReport").innerHTML=`<h3>🌎 Rewilding Complete!</h3>
-    <p>You restored <b>${addedRestored.toLocaleString()}</b> sq ft this run.</p>
-    <p>Total restored: <b>${state.restored.toLocaleString()}</b> sq ft — about the size of ${comparison}.</p>
-    <p>Your work inspires others, earning <b>+1 Eco Knowledge</b>.</p>`;
-  document.getElementById("prestigeReport").style.display="block";
-  logEntry(`📖 Rewilding complete! This run restored ${addedRestored.toLocaleString()} sq ft. Total restored: ${state.restored.toLocaleString()} sq ft — roughly the size of ${comparison}.`);
-  state.seeds=0; state.plants={}; state.pollinators={}; state.stewardship=0; firstPlantPurchased=false; firstAutoPlantLogged=false; state.newSprouts=[];
-  document.getElementById("entries").innerHTML="";
+// --- GAME LOGIC ---
+function scatter(){
+  state.seeds += 10; // simple example
+  logEntry("Scattered 10 seeds.");
   render();
 }
 
-// --- Plant Counts ---
-function renderPlantCounts(){
-  const div=document.getElementById("plantCounts");
-  div.innerHTML="<h3>🌿 Plant Counts</h3>";
-  PLANTS.forEach(plant=>{
-    const count=state.plants[plant.name]||0;
-    const d=document.createElement("div");
-    d.textContent=`${plant.name}: ${count}`;
-    d.style.color=PLANT_COLORS[plant.name]||"#000"; d.style.fontWeight="bold";
-    if(count>0 && state.newSprouts.includes(plant.name)){ d.classList.add("new-sprout"); }
-    div.appendChild(d);
+function prestige(){
+  if(Object.values(state.plants).reduce((a,b)=>a+b,0)<50) return;
+  state.ecoKnowledge++;
+  state.restored += Object.values(state.plants).reduce((a,b)=>a+b,0);
+  state.seeds = 0;
+  state.plants = {};
+  state.pollinators = {};
+  state.stewardship = 0;
+  initInitialCounts();
+  logEntry("🔄 Land rewilded! Prestige gained.");
+  render();
+}
+
+function logEntry(msg){
+  const div = document.getElementById("entries");
+  const p = document.createElement("p");
+  p.textContent = msg;
+  div.prepend(p);
+}
+
+// --- RESTORATION STATS ---
+function updateRestorationStats(){
+  let totalSquare=0;
+  let totalBio=0;
+  const tbody = document.getElementById("restorationTable").querySelector("tbody");
+  tbody.innerHTML = "";
+
+  // Plants
+  PLANTS.forEach(p=>{
+    const initial=initialCounts[p.name]||0;
+    const current=state.plants[p.name]||0;
+    const sq=current*(p.squareFootage||5);
+    totalSquare+=sq;
+    const row=document.createElement("tr");
+    row.innerHTML=`<td>${p.name}</td><td>Plant</td><td>${initial}</td><td>${current}</td><td>${sq}</td>`;
+    if(state.newSprouts.includes(p.name)) row.classList.add("new-sprout");
+    tbody.appendChild(row);
   });
+
+  // Pollinators
+  POLLINATORS.forEach(pol=>{
+    const count=state.pollinators[pol.name]||0;
+    const points=(POLLINATOR_BIODIVERSITY[pol.name]||1)*count;
+    totalBio+=points;
+    const row=document.createElement("tr");
+    row.innerHTML=`<td>${pol.name}</td><td>Pollinator</td><td>-</td><td>${count}</td><td>${points}</td>`;
+    if(state.newSprouts.includes(pol.name)) row.classList.add("new-pollinator");
+    tbody.appendChild(row);
+  });
+
+  state.restored=totalSquare;
+  document.getElementById("squareFootage").textContent=totalSquare;
+  document.getElementById("biodiversityScore").textContent=totalBio;
+
+  // Clear markers for next tick
   state.newSprouts=[];
 }
 
-// --- Pollinator Counts ---
-function renderPollinatorCounts(){
-  const div=document.getElementById("pollinatorCounts");
-  div.innerHTML="<h3>🐝 Pollinator Counts</h3>";
+// --- POLLINATOR ARRIVALS ---
+function checkPollinators(){
   POLLINATORS.forEach(pol=>{
-    const count=state.pollinators[pol.name]||0;
-    const d=document.createElement("div");
-    d.textContent=`${pol.name}: ${count}`;
-    d.style.color=POLLINATOR_COLORS[pol.name]||"#000"; 
-    d.style.fontWeight="bold";
-    div.appendChild(d);
-  });
-}
+    const hostCount = pol.host ? (state.plants[pol.host]||0) : 0;
+    const foodCount = pol.food ? (state.plants[pol.food]||0) : 0;
+    const relevantPlants =hostCount + foodCount;
 
-// --- Shop ---
-function renderShop(){
-  const shopBody=document.getElementById("shopBody"); 
-  shopBody.innerHTML="";
-  const h=document.createElement("h3"); h.textContent="Plant Shop"; shopBody.appendChild(h);
-  PLANTS.forEach(plant=>{
-    const btn=document.createElement("button");
-    btn.textContent=`Buy ${plant.name} (${plant.cost} seeds) [+${plant.rate}/tick]`;
-    btn.addEventListener("click",()=>buyPlant(plant));
-    shopBody.appendChild(btn);
-  });
-  const h2=document.createElement("h3"); h2.textContent="Pollinators"; shopBody.appendChild(h2);
-  POLLINATORS.forEach(pol=>{
-    const div=document.createElement("div");
-    const count=state.pollinators[pol.name]||0;
-    div.textContent=`${pol.name}: ${count} (Host: ${pol.host}, Food: ${pol.food})`;
-    shopBody.appendChild(div);
-  });
-}
+    if(relevantPlants > 0){
+      const currentCount = state.pollinators[pol.name] || 0;
+      const maxAllowed = Math.floor(relevantPlants / 2) + 1; // limit based on plants
+      const baseChance = 0.05;
+      const probability = baseChance * relevantPlants;
 
-// --- Main Render ---
-function render(){
-  const totalPlants=Object.values(state.plants).reduce((a,b)=>a+b,0);
-  const uniquePlants=Object.keys(state.plants).filter(p=>state.plants[p]>0).length;
-  const diversityMult=1+(uniquePlants-1)*0.1;
+      if(currentCount < maxAllowed && Math.random() < probability){
+        state.pollinators[pol.name] = currentCount + 1;
+        if(!state.newSprouts.includes(pol.name)) state.newSprouts.push(pol.name);
 
-  let pollinatorBoost=1;
-  for(let pol of POLLINATORS){
-    const count=state.pollinators[pol.name]||0;
-    pollinatorBoost+=pol.boost*count;
-  }
-
-  document.getElementById("seeds").textContent=state.seeds;
-  document.getElementById("plants").textContent=totalPlants;
-  document.getElementById("pollinators").textContent=Object.keys(state.pollinators).filter(k=>state.pollinators[k]>0).length;
-  document.getElementById("stewardship").textContent=Math.floor(state.stewardship);
-  document.getElementById("div").textContent=diversityMult.toFixed(1);
-  document.getElementById("eco").textContent=state.ecoKnowledge;
-  document.getElementById("restored").textContent=state.restored.toLocaleString();
-
-  renderPlantCounts();
-  renderPollinatorCounts();
-  renderShop();
-}
-
-// --- Growth Loop ---
-setInterval(()=>{
-  checkPollinators();
-
-  let plantSeedGain=0;
-  PLANTS.forEach(plant=>{
-    const count=state.plants[plant.name]||0;
-    plantSeedGain+=count*plant.rate;
-  });
-
-  const uniquePlantsCount=Object.keys(state.plants).filter(p=>state.plants[p]>0).length;
-  const diversityMult=1+(uniquePlantsCount-1)*0.1;
-  const prestigeMult=1+state.ecoKnowledge*0.5;
-
-  state.seeds+=Math.floor(plantSeedGain*pollinatorBoost*diversityMult*prestigeMult);
-  state.stewardship+=(Object.keys(state.pollinators).filter(k=>state.pollinators[k]).length*0.5+uniquePlantsCount*0.2)*prestigeMult;
-
-  // Seed to plant conversion (biased toward lower-cost plants)
-  if(state.seeds>0){
-    state.newSprouts=[];
-    const seedsToConvert=Math.min(state.seeds, Math.floor(Math.random()*3)+1);
-    for(let i=0;i<seedsToConvert;i++){
-      const chosenPlant=choosePlantByWeight(PLANTS);
-      state.plants[chosenPlant.name]=(state.plants[chosenPlant.name]||0)+1;
-      state.seeds-=1;
-      state.newSprouts.push(chosenPlant.name); // track for animation
-      if(!firstAutoPlantLogged){
-        logEntry(`🌿 A ${chosenPlant.name} has sprouted on its own; life begins to flourish.`, chosenPlant.name);
-        firstAutoPlantLogged=true;
+        // Record in field guide
+        if(!discoveries.pollinators[pol.name]) discoveries.pollinators[pol.name] = {};
       }
     }
+  });
+}
+
+// --- PLANT GROWTH ---
+function growPlants(){
+  PLANTS.forEach(p=>{
+    const month = state.month + 1; // months 1-12
+    if(p.sproutMonths.includes(month)){
+      // Seed-to-plant conversion: prefer lower cost plants
+      const chance = 0.5 / (p.cost || 1);
+      if(Math.random() < chance){
+        state.plants[p.name] = (state.plants[p.name] || 0) + 1;
+        state.newSprouts.push(p.name);
+
+        // Record in field guide
+        if(!discoveries.plants[p.name]) discoveries.plants[p.name] = {};
+      }
+    }
+  });
+}
+
+// --- FIELD GUIDE ---
+function renderFieldGuide(){
+  const guide = document.getElementById("fieldGuide");
+  const guidePlants = document.getElementById("guidePlants");
+  const guidePollinators = document.getElementById("guidePollinators");
+  guidePlants.innerHTML="<h3>🌿 Plants</h3>";
+  guidePollinators.innerHTML="<h3>🐝 Pollinators</h3>";
+
+  for(const pName in discoveries.plants){
+    guidePlants.innerHTML += `<p>${pName}</p>`;
   }
+  for(const polName in discoveries.pollinators){
+    guidePollinators.innerHTML += `<p>${polName}</p>`;
+  }
+}
 
-  render();
-},2000);
+// --- RENDER ---
+function render(){
+  document.getElementById("seeds").textContent = state.seeds;
+  document.getElementById("stewardship").textContent = state.stewardship;
+  document.getElementById("restored").textContent = state.restored;
+  document.getElementById("ecoKnowledge").textContent = state.ecoKnowledge;
+  updateRestorationStats();
+}
 
-// --- Event Listeners ---
-document.getElementById("scatterBtn").addEventListener("click",scatter);
-document.getElementById("prestigeBtn").addEventListener("click",prestige);
+// --- GAME TICK LOOP ---
+function gameTick(){
+  tick++;
+  state.month = tick % 12;
 
-// --- Initial Render ---
+  growPlants();
+  checkPollinators();
+  updateRestorationStats();
+}
+
+// --- EVENT LISTENERS ---
+document.getElementById("scatter").addEventListener("click", scatter);
+document.getElementById("prestige").addEventListener("click", prestige);
+document.getElementById("guideBtn").addEventListener("click", ()=>document.getElementById("fieldGuide").classList.remove("hidden"));
+document.getElementById("closeGuide").addEventListener("click", ()=>document.getElementById("fieldGuide").classList.add("hidden"));
+document.getElementById("toggleKnowledge").addEventListener("click", ()=>{
+  showKnowledge = !showKnowledge;
+});
+
+// --- INIT ---
+initInitialCounts();
+setInterval(gameTick, 2000); // 2s per tick
 render();
