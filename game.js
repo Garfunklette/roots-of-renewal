@@ -11,10 +11,31 @@ const state = {
   discoveredPollinators: new Set()
 };
 
+// Returns current number of species
+function getSpeciesCounts(){
+  return {
+    plantCount: Object.keys(state.plants).length,
+    pollinatorCount: Object.keys(state.pollinators).length
+  };
+}
+
 // Update UI counters
 function updateUI(){
+  // Seeds
   document.getElementById("seedCount").textContent = state.seeds;
-  document.getElementById("stewardshipPoints").textContent = state.stewardshipPoints.toFixed(1);
+
+  // Species counts
+  const { plantCount, pollinatorCount } = getSpeciesCounts();
+  document.getElementById("plantSpeciesCount").textContent = plantCount;
+  document.getElementById("pollinatorSpeciesCount").textContent = pollinatorCount;
+
+  // Prestige info
+  document.getElementById("prestigeLevel").textContent = state.prestigeLevel;
+  document.getElementById("prestigeTierName").textContent = getCurrentTier().name;
+  document.getElementById("globalImpactPoints").textContent = state.globalImpactPoints;
+
+  // Optional: current month display
+  document.getElementById("currentMonth").textContent = getMonthName(state.currentMonth);
 }
 
 // Plant a seed manually
