@@ -44,7 +44,7 @@ function buildFieldGuide() {
       let extraInfo = "";
 
       if(isPlant){
-        extraInfo += `<p><em>Bloom months:</em> ${item.bloomMonths.join(", ")}.</p>`;
+        extraInfo += `<p><em>Bloom months:</em> ${item.bloomMonths.join(", ")}</p>`;
         if(item.hostFor.length>0) extraInfo += `<p>Host for: ${item.hostFor.join(", ")}</p>`;
         if(item.foodFor.length>0) extraInfo += `<p>Food source for: ${item.foodFor.join(", ")}</p>`;
         extraInfo += `<p>Contributes ~${item.squareFootage} ft² per plant.</p>`;
@@ -59,7 +59,13 @@ function buildFieldGuide() {
           <h4>${item.name}</h4>
           <p>${item.blurb}</p>
           ${extraInfo}
-          <button onclick="revealStats('${item.name}','${isPlant ? 'plant':'pollinator'}')">Reveal Details</button>
+          <button class="toggleDetailsBtn" onclick="toggleDetails(this)">Reveal Details</button>
+          <div class="details" style="display:none;">
+            ${isPlant ? 
+              `Cost: ${item.cost}, Growth Rate: ${item.rate || 'N/A'}, Sprout: ${item.sproutMonths.join(", ")}, Seed: ${item.seedMonths.join(", ")}` :
+              `Boost: ${item.boost*100}%, Host: ${item.host||"None"}, Food: ${item.food||"Various"}`
+            }
+          </div>
         </div>
       `;
     }).join("");
@@ -84,14 +90,15 @@ document.getElementById("nextPage").addEventListener("click",()=>{
   currentPage++; buildFieldGuide();
 });
 
-// Reveal backend stats
-function revealStats(name,type){
-  if(type==="plant"){
-    const plant = PLANTS.find(p=>p.name===name);
-    alert(`${name} → Cost: ${plant.cost}, Growth Rate: ${plant.rate || 'N/A'}, Sprout: ${plant.sproutMonths.join(", ")}, Seed: ${plant.seedMonths.join(", ")}`);
+// Toggle inline details
+function toggleDetails(button){
+  const detailsDiv = button.nextElementSibling;
+  if(detailsDiv.style.display === "none"){
+    detailsDiv.style.display = "block";
+    button.textContent = "Hide Details";
   } else {
-    const pol = POLLINATORS.find(p=>p.name===name);
-    alert(`${name} → Boost: ${pol.boost*100}%, Host: ${pol.host||"None"}, Food: ${pol.food||"Various"}`);
+    detailsDiv.style.display = "none";
+    button.textContent = "Reveal Details";
   }
 }
 
@@ -119,7 +126,7 @@ function showDiscoveryPopup(name, type) {
   setTimeout(()=>popup.remove(),6000);
 }
 
-// Hook discovery popups to first plant/pollinator addition
+// Hooks for adding new plants/pollinators with discovery
 function addPlant(name){
   if(!state.plants[name]) state.plants[name]=0;
   state.plants[name]++;
@@ -127,6 +134,8 @@ function addPlant(name){
     state.discoveredPlants.add(name);
     showDiscoveryPopup(name,"plant");
   }
+  buildFieldGuide(); // refresh guide if open
+  updateUI();
 }
 
 function addPollinator(name){
@@ -136,4 +145,6 @@ function addPollinator(name){
     state.discoveredPollinators.add(name);
     showDiscoveryPopup(name,"pollinator");
   }
-        }
+  buildFieldGuide(); // refresh guide if open
+  updateUI();
+}
