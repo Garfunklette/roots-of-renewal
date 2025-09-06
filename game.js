@@ -1,8 +1,8 @@
 // game.js
 
-// Initialize state
+// Initialize game state
 const state = {
-  seeds: 10, // start with 10 seeds
+  seeds: 10,
   plants: {},
   pollinators: {},
   stewardshipPoints: 0,
@@ -10,7 +10,22 @@ const state = {
   discoveredPollinators: new Set()
 };
 
-// Helper: Add plant with discovery popup
+// Update UI counters
+function updateUI(){
+  document.getElementById("seedCount").textContent = state.seeds;
+  document.getElementById("stewardshipPoints").textContent = state.stewardshipPoints.toFixed(1);
+}
+
+// Plant a seed manually
+function plantSeed(plantName){
+  const plant = PLANTS.find(p=>p.name===plantName);
+  if(!plant || state.seeds < plant.cost) return;
+
+  state.seeds -= plant.cost;
+  addPlant(plantName);
+}
+
+// Helper: Add plant
 function addPlant(name){
   if(!state.plants[name]) state.plants[name]=0;
   state.plants[name]++;
@@ -18,10 +33,11 @@ function addPlant(name){
     state.discoveredPlants.add(name);
     showDiscoveryPopup(name,"plant");
   }
+  buildFieldGuide();
   updateUI();
 }
 
-// Helper: Add pollinator with discovery popup
+// Helper: Add pollinator
 function addPollinator(name){
   if(!state.pollinators[name]) state.pollinators[name]=0;
   state.pollinators[name]++;
@@ -29,42 +45,44 @@ function addPollinator(name){
     state.discoveredPollinators.add(name);
     showDiscoveryPopup(name,"pollinator");
   }
+  buildFieldGuide();
   updateUI();
 }
 
-// Update UI counters
-function updateUI(){
-  document.getElementById("seedCount").textContent = state.seeds;
-  document.getElementById("stewardshipPoints").textContent = state.stewardshipPoints;
-}
-
-// Plant a seed (manual action)
-function plantSeed(plantName){
-  const plant = PLANTS.find(p=>p.name===plantName);
-  if(!plant || state.seeds < plant.cost) return;
-
-  state.seeds -= plant.cost;
-  addPlant(plantName);
-
-  // Add pollinators if host plant present
-  POLLINATORS.forEach(pol=>{
-    if(pol.host && state.plants[pol.host] && !state.pollinators[pol.name]){
-      addPollinator(pol.name);
-    }
-  });
-}
-
-// Plant a random initial plant, biased toward lower cost
+// Plant a random initial plant (weighted toward lower cost)
 function plantRandomInitialPlant() {
   const weightedPlants = [];
   PLANTS.forEach(plant => {
-    const weight = Math.max(1, Math.floor(50 / plant.cost)); // lower cost = higher weight
+    const weight = Math.max(1, Math.floor(50 / plant.cost));
     for(let i=0; i<weight; i++) weightedPlants.push(plant);
   });
   const randomPlant = weightedPlants[Math.floor(Math.random() * weightedPlants.length)];
   addPlant(randomPlant.name);
 }
 
-// Start game
+// Discovery popup
+function showDiscoveryPopup(name,type){
+  let blurb="";
+  if(type==="plant"){
+    const plant = PLANTS.find(p=>p.name===name);
+    if(plant && plant.blurb) blurb = plant.blurb.split(".")[0]+".";
+  } else {
+    const pol = POLLINATORS.find(p=>p.name===name);
+    if(pol && pol.blurb) blurb = pol.blurb.split(".")[0]+".";
+  }
+
+  const popup = document.createElement("div");
+  popup.className="discoveryPopup";
+  popup.innerHTML=`
+    <h3>📖 New Entry Discovered!</h3>
+    <p><strong>${name}</strong> (${type === "plant" ? "Plant" : "Pollinator"})</p>
+    <p><em>${blurb}</em></p>
+    <button onclick="this.parentElement.remove()">Close</button>
+  `;
+  document.body.appendChild(popup);
+  setTimeout(()=>popup.remove(),6000);
+}
+
+// Initialize game
 updateUI();
 plantRandomInitialPlant();
