@@ -1,46 +1,32 @@
-/* Default Light Theme */
+/* Default (light) theme */
 body {
-  background: #fdfdfd;
-  color: #222;
-  transition: background 0.3s, color 0.3s;
+  background-color: #ffffff;
+  color: #222222;
+  font-family: sans-serif;
 }
 
-/* Discovery popups */
-.discoveryPopup {
-  background: #fff;
-  color: #222;
-  border: 2px solid #444;
-  padding: 10px;
-  border-radius: 8px;
-  max-width: 280px;
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-}
-
-/* Dark Mode Overrides */
+/* Dark mode */
 body.dark {
-  background: #121212;
+  background-color: #121212;
   color: #e0e0e0;
 }
 
-body.dark .discoveryPopup {
-  background: #1f1f1f;
+body.dark .discoveryPopup,
+body.dark .guideEntry {
+  background-color: #1f1f1f;
   color: #e0e0e0;
-  border: 2px solid #666;
+  border: 1px solid #333;
 }
 
 button {
-  background: #e0e0e0;
-  color: #222;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 0.4em 0.8em;
+  margin: 0.5em;
   cursor: pointer;
 }
 
-body.dark button {
-  background: #333;
+/* Optional: style the dark mode toggle button differently in dark mode */
+body.dark button#darkModeToggle {
+  background-color: #333;
   color: #e0e0e0;
+  border: 1px solid #555;
 }
