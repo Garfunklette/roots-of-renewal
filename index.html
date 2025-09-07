@@ -8,9 +8,16 @@
 </head>
 <body>
   <div>
-    <p>Month: <span id="currentMonth">Apr</span></p>
-<p>Seeds: <span id="seedCount">10</span></p>
-<p>Stewardship Points: <span id="stewardshipPoints">0</span></p>
+
+<p>Seeds: <span id="seedCount">0</span></p>
+<p>Plant Species: <span id="plantSpeciesCount">0</span></p>
+<p>Pollinator Species: <span id="pollinatorSpeciesCount">0</span></p>
+<p>Prestige Level: <span id="prestigeLevel">0</span></p>
+<p>Current Tier: <span id="prestigeTierName">Own Garden</span></p>
+<p>Global Impact (Species Count): <span id="globalImpactPoints">0</span></p>
+<div id="prestigeMessage"></div>
+<p>Current Month: <span id="currentMonth">April</span></p>
+<button onclick="prestige()">Advance Restoration Tier</button>
     <button onclick="openFieldGuide()">Open Field Guide</button>
   </div>
 
@@ -28,6 +35,9 @@
     </div>
     <button id="closeGuide" onclick="closeFieldGuide()">Close</button>
   </div>
+<div>
+<button id="prestigeBtn" onclick="prestige()">Advance Restoration Tier</button>
+<div id="prestigeMessage"></div>
 
   <!-- Species data -->
 <script src="speciesData.js"></script>
@@ -40,6 +50,8 @@
 
 <!-- Core game logic -->
 <script src="game.js"></script>
+  <!-- Prestige -->
+<script src="prestige.js"></script>
   
 </body>
 </html>
