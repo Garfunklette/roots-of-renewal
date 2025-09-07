@@ -137,6 +137,6 @@ function applyTheme(isDark){
 const darkToggle = document.getElementById("darkModeToggle");
 if(darkToggle){
   darkToggle.addEventListener("click",()=>{
-    document.body.classList.toggle("dark-mode");
+    document.body.classList.toggle("dark");
   });
                                  }
