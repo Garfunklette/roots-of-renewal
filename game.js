@@ -3,8 +3,8 @@
 // Initialize game state
 const state = {
   seeds: 10,
-  plants: {}, // { "Milkweed": 3 }
-  pollinators: {}, // { "Monarch": 1 }
+  plants: {}, // { "Milkweed": 3, "Blazing Star": 5 }
+  pollinators: {}, // { "Monarch": 1, "Bumblebee": 2 }
   prestigeLevel: 0,
   globalImpactPoints: 0,
   discoveredPlants: new Set(),
@@ -13,7 +13,7 @@ const state = {
 };
 
 // Returns current number of species
-function getSpeciesCounts() {
+function getSpeciesCounts(){
   return {
     plantCount: Object.keys(state.plants).length,
     pollinatorCount: Object.keys(state.pollinators).length
@@ -21,40 +21,36 @@ function getSpeciesCounts() {
 }
 
 // Plant a seed manually
-function plantSeed(plantName) {
-  const plant = PLANTS.find(p => p.name === plantName);
-  if (!plant || state.seeds < plant.cost) return;
+function plantSeed(plantName){
+  const plant = PLANTS.find(p=>p.name===plantName);
+  if(!plant || state.seeds < plant.cost) return;
 
   state.seeds -= plant.cost;
   addPlant(plantName);
 }
 
 // Helper: Add plant
-function addPlant(name) {
-  if (!state.plants[name]) state.plants[name] = 0;
+function addPlant(name){
+  if(!state.plants[name]) state.plants[name]=0;
   state.plants[name]++;
-
-  if (!state.discoveredPlants.has(name)) {
+  if(!state.discoveredPlants.has(name)){
     state.discoveredPlants.add(name);
-    showDiscoveryPopup(name, "plant"); // UI
+    showDiscoveryPopup(name,"plant"); // now in ui.js
   }
-
-  buildFieldGuide(); // UI
-  updateUI();        // UI
+  buildFieldGuide(); // now in ui.js
+  updateUI();        // now in ui.js
 }
 
 // Helper: Add pollinator
-function addPollinator(name) {
-  if (!state.pollinators[name]) state.pollinators[name] = 0;
+function addPollinator(name){
+  if(!state.pollinators[name]) state.pollinators[name]=0;
   state.pollinators[name]++;
-
-  if (!state.discoveredPollinators.has(name)) {
+  if(!state.discoveredPollinators.has(name)){
     state.discoveredPollinators.add(name);
-    showDiscoveryPopup(name, "pollinator"); // UI
+    showDiscoveryPopup(name,"pollinator"); // now in ui.js
   }
-
-  buildFieldGuide(); // UI
-  updateUI();        // UI
+  buildFieldGuide(); // now in ui.js
+  updateUI();        // now in ui.js
 }
 
 // Plant a random initial plant (weighted toward lower cost)
@@ -62,7 +58,7 @@ function plantRandomInitialPlant() {
   const weightedPlants = [];
   PLANTS.forEach(plant => {
     const weight = Math.max(1, Math.floor(50 / plant.cost));
-    for (let i = 0; i < weight; i++) weightedPlants.push(plant);
+    for(let i=0; i<weight; i++) weightedPlants.push(plant);
   });
   const randomPlant = weightedPlants[Math.floor(Math.random() * weightedPlants.length)];
   addPlant(randomPlant.name);
@@ -72,5 +68,7 @@ function plantRandomInitialPlant() {
 window.onload = () => {
   updateUI();              // from ui.js
   plantRandomInitialPlant();
-  startMonthProgression(3000); // from time.js
+  if (typeof startMonthProgression === "function") {
+    startMonthProgression(3000); // from time.js
+  }
 };
