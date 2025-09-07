@@ -129,16 +129,18 @@ function renderJournal(){
   });
 }
 
-// Dark mode toggle
-function applyTheme(isDark){
-  document.body.classList.toggle("dark",isDark);
-}
-
+// Dark mode toggle + persistence
 document.addEventListener("DOMContentLoaded", () => {
   const darkToggle = document.getElementById("darkModeToggle");
+
+  // Apply saved preference on load
+  const savedDark = localStorage.getItem("darkMode") === "1";
+  if(savedDark) document.body.classList.add("dark");
+
   if(darkToggle){
-    darkToggle.addEventListener("click", ()=>{
-      document.body.classList.toggle("dark");
+    darkToggle.addEventListener("click", () => {
+      const isDark = document.body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
     });
   }
 });
