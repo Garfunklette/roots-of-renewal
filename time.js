@@ -1,102 +1,65 @@
 // time.js
 
-// Array of month names
-const MONTH_NAMES = ["April","May","June","July","August","September","October","November","December","January","February","March"];
-
-// Auto-advance interval (ms)
-let monthInterval = null;
-
-// Start month progression
+// Month progression logic
 function startMonthProgression(intervalMs = 3000){
-  if(monthInterval) clearInterval(monthInterval);
-  monthInterval = setInterval(() => {
-    processMonth();
-  }, intervalMs);
+  setInterval(()=>advanceMonth(), intervalMs);
 }
 
-// Stop month progression
-function stopMonthProgression(){
-  if(monthInterval) clearInterval(monthInterval);
-}
-
-// Advance month
+// Advance to next month
 function advanceMonth(){
   state.currentMonth = (state.currentMonth + 1) % 12;
+
+  handlePlantCycles();
+  handlePollinatorArrivals();
+
+  updateUI(); // from ui.js
 }
 
-// Process monthly plant and pollinator updates
-function processMonth(){
-  const month = state.currentMonth;
-  const multiplier = getPrestigeMultiplier();
+// Handle plant growth cycles
+function handlePlantCycles(){
+  Object.keys(state.plants).forEach(name=>{
+    const plant = PLANTS.find(p=>p.name===name);
+    if(!plant) return;
 
-  // Plants
-  for(const plantName in state.plants){
-    const plant = PLANTS.find(p => p.name === plantName);
-    const count = state.plants[plantName];
-    if(!plant) continue;
-
-    // Sprout
-    if(plant.sproutMonths.includes(month)){
-      const newSeeds = Math.ceil(count * 0.5 * multiplier);
-      state.seeds += newSeeds;
+    // Bloom months produce points
+    if(plant.bloomMonths.includes(state.currentMonth)){
+      // stewardship → biodiversity change
+      state.globalImpactPoints += state.plants[name];
     }
 
-    // Bloom
-    if(plant.bloomMonths.includes(month)){
-      processPollinatorArrivalForPlant(plant, count);
+    // Seed months generate extra seeds
+    if(plant.seedMonths && plant.seedMonths.includes(state.currentMonth)){
+      state.seeds += Math.ceil(state.plants[name] * 0.5);
     }
-
-    // Seed production
-    if(plant.seedMonths.includes(month)){
-      const extraSeeds = Math.ceil(count * 0.5 * multiplier);
-      state.seeds += extraSeeds;
-    }
-  }
-
-  // Advance month
-  advanceMonth();
-
-  // Update UI
-  updateUI();
-
-  // Update Field Journal
-  updateFieldJournal(month);
+  });
 }
 
-// Pollinator arrival per plant
-function processPollinatorArrivalForPlant(plant, count){
-  plant.pollinators.forEach(pollinatorName => {
-    const pollinator = POLLINATORS.find(p => p.name === pollinatorName);
-    if(!pollinator) return;
+// Handle pollinator arrival logic
+function handlePollinatorArrivals(){
+  POLLINATORS.forEach(pol=>{
+    if(state.discoveredPollinators.has(pol.name)) return;
 
-    const relevantPlantCount = state.plants[plant.name] || 0;
-    if(relevantPlantCount > 0){
-      const chance = Math.min(0.5, relevantPlantCount * 0.1);
+    // Check host and food plants
+    const hasHost = pol.hostPlants.some(h=>state.plants[h] > 0);
+    const hasFood = pol.foodPlants.some(f=>state.plants[f] > 0);
+
+    if(hasHost && hasFood){
+      const hostCount = pol.hostPlants.reduce((sum,h)=>sum+(state.plants[h]||0),0);
+      const foodCount = pol.foodPlants.reduce((sum,f)=>sum+(state.plants[f]||0),0);
+      const chance = Math.min(0.2, (hostCount + foodCount) * 0.01); // up to 20%
+
       if(Math.random() < chance){
-        if(!state.pollinators[pollinatorName]){
-          state.pollinators[pollinatorName] = 1;
-          state.discoveredPollinators.add(pollinatorName);
-        } else {
-          state.pollinators[pollinatorName]++;
-        }
+        addPollinator(pol.name);
       }
     }
   });
 }
 
-// Helper: get month name
-function getMonthName(monthIndex){
-  return MONTH_NAMES[monthIndex % 12];
+// Utility: convert month index to name
+function getMonthName(index){
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+  return months[index % 12];
 }
-
-// Update Field Journal
-function updateFieldJournal(month){
-  const monthName = getMonthName(month);
-  const { plantCount, pollinatorCount } = getSpeciesCounts();
-  const journalEntry = `Month: ${monthName} | Plants: ${plantCount} | Pollinators: ${pollinatorCount}`;
-  console.log(journalEntry); // replace with UI Field Journal update
-}
-
-// Start auto-progression when game starts
-if(state.currentMonth === undefined) state.currentMonth = 0; // start in April
-startMonthProgression(3000); // default 3 seconds per month
