@@ -4,14 +4,23 @@
 // State Initialization
 // --------------------
 const state = {
+
   seeds: 10,
-  plants: {},               // { "Milkweed": 2, "Blazing Star": 1 }
-  pollinators: {},          // { "Monarch": 1, "Bumblebee": 2 }
+
+  plants: {},               // { "Milkweed": 3 }
+
+  pollinators: {},          // { "Monarch": 1 }
+
   prestigeLevel: 0,
+
   globalImpactPoints: 0,
-  currentMonth: 0,          // Start in April (0 = April, see time.js)
+
   discoveredPlants: new Set(),
-  discoveredPollinators: new Set()
+
+  discoveredPollinators: new Set(),
+
+  currentMonth: 0           // needed for month display / progression
+
 };
 
 // --------------------
