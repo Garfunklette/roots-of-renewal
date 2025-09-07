@@ -131,12 +131,15 @@ function renderJournal(){
 
 // Dark mode toggle
 function applyTheme(isDark){
-  document.body.classList.toggle("dark-mode",isDark);
+  document.body.classList.toggle("dark",isDark);
 }
 
-const darkToggle = document.getElementById("darkModeToggle");
-if(darkToggle){
-  darkToggle.addEventListener("click",()=>{
-    document.body.classList.toggle("dark");
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  const darkToggle = document.getElementById("darkModeToggle");
+  if(darkToggle){
+    darkToggle.addEventListener("click", ()=>{
+      document.body.classList.toggle("dark");
+    });
+  }
+});
                                  }
