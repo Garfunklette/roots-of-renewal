@@ -35,7 +35,14 @@ function plantSeed(plantName){
   if(!plant || state.seeds < plant.cost) return;
 
   state.seeds -= plant.cost;
-  addPlant(plantName);
+
+  if(plant.sproutMonths.includes(state.currentMonth)){
+    addPlant(plantName); // grows immediately
+  } else {
+    state.seedBank.push({ plantName, plantedMonth: state.currentMonth });
+  }
+
+  updateUI();
 }
 
 // Helper: Add plant
@@ -60,6 +67,23 @@ function addPollinator(name){
   }
   buildFieldGuide(); // now in ui.js
   updateUI();        // now in ui.js
+}
+
+// Scatter seeds
+function scatterSeeds(numSeeds = 5){
+  if(state.seeds < numSeeds) return;
+  state.seeds -= numSeeds;
+
+  for(let i=0; i<numSeeds; i++){
+    const randomPlant = PLANTS[Math.floor(Math.random() * PLANTS.length)];
+    if(randomPlant.sproutMonths.includes(state.currentMonth)){
+      addPlant(randomPlant.name);
+    } else {
+      state.seedBank.push({ plantName: randomPlant.name, plantedMonth: state.currentMonth });
+    }
+  }
+
+  updateUI();
 }
 
 // Plant a random initial plant (weighted toward lower cost)
