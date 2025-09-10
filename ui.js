@@ -42,30 +42,25 @@ function showDiscoveryPopup(name,type){
   setTimeout(()=>popup.remove(),6000);
 }
 
-// Field Guide builder
-function buildFieldGuide(){
+// Field Guide builder with tabs
+function buildFieldGuide(activeTab = "plants") {
   const guide = document.getElementById("fieldGuideContent");
   guide.innerHTML = "";
 
-  // Plants
-  if(state.discoveredPlants.size > 0){
-    const plantHeader = document.createElement("h2");
-    plantHeader.textContent = "🌱 Plants";
-    guide.appendChild(plantHeader);
-
+  if (activeTab === "plants" && state.discoveredPlants.size > 0) {
     const sortedPlants = Array.from(state.discoveredPlants).sort();
-    sortedPlants.forEach(name=>{
-      const plant = PLANTS.find(p=>p.name===name);
-      if(plant){
+    sortedPlants.forEach(name => {
+      const plant = PLANTS.find(p => p.name === name);
+      if (plant) {
         const div = document.createElement("div");
-        div.className="guideEntry";
-        div.innerHTML=`
+        div.className = "guideEntry";
+        div.innerHTML = `
           <h3>${plant.name}</h3>
           <p>${plant.blurb}</p>
           <p><strong>Bloom:</strong> ${
             plant.bloomMonths.length === 1
               ? "Blooms in " + getMonthName(plant.bloomMonths[0])
-              : "Blooms from " + getMonthName(plant.bloomMonths[0]) + " to " + getMonthName(plant.bloomMonths[plant.bloomMonths.length-1])
+              : "Blooms from " + getMonthName(plant.bloomMonths[0]) + " to " + getMonthName(plant.bloomMonths[plant.bloomMonths.length - 1])
           }</p>
           <p><strong>Height:</strong> ${plant.height}</p>
           <p><strong>Spacing:</strong> ${plant.spacing}</p>
@@ -80,19 +75,14 @@ function buildFieldGuide(){
     });
   }
 
-  // Pollinators
-  if(state.discoveredPollinators.size > 0){
-    const polHeader = document.createElement("h2");
-    polHeader.textContent = "🦋 Pollinators";
-    guide.appendChild(polHeader);
-
+  if (activeTab === "pollinators" && state.discoveredPollinators.size > 0) {
     const sortedPols = Array.from(state.discoveredPollinators).sort();
-    sortedPols.forEach(name=>{
-      const pol = POLLINATORS.find(p=>p.name===name);
-      if(pol){
+    sortedPols.forEach(name => {
+      const pol = POLLINATORS.find(p => p.name === name);
+      if (pol) {
         const div = document.createElement("div");
-        div.className="guideEntry";
-        div.innerHTML=`
+        div.className = "guideEntry";
+        div.innerHTML = `
           <h3>${pol.name}</h3>
           <p>${pol.blurb}</p>
           <p><strong>Host Plants:</strong> ${pol.hostPlants.join(", ")}</p>
@@ -103,6 +93,7 @@ function buildFieldGuide(){
     });
   }
 }
+
 
 // Journal rendering (if you’re keeping it separate from field guide)
 function renderJournal(){ 
@@ -145,3 +136,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
                                  }
+document.addEventListener("DOMContentLoaded", () => {
+  const plantsTab = document.getElementById("plantsTab");
+  const pollinatorsTab = document.getElementById("pollinatorsTab");
+
+  if (plantsTab && pollinatorsTab) {
+    plantsTab.addEventListener("click", () => {
+      buildFieldGuide("plants");
+    });
+    pollinatorsTab.addEventListener("click", () => {
+      buildFieldGuide("pollinators");
+    });
+  }
+
+  // Default tab on load
+  buildFieldGuide("plants");
+});
