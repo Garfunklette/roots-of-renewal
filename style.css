@@ -1,40 +1,32 @@
+/* Default (light) theme */
 body {
-  font-family: Arial, sans-serif;
-  padding: 1em;
-  background-color: #f0f5ef;
+  background-color: #ffffff;
+  color: #222222;
+  font-family: sans-serif;
+}
+
+/* Dark mode */
+body.dark {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark .discoveryPopup,
+body.dark .guideEntry {
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+  border: 1px solid #333;
 }
 
 button {
-  margin: 0.2em;
-  padding: 0.5em 1em;
-  font-size: 1em;
+  padding: 0.4em 0.8em;
+  margin: 0.5em;
+  cursor: pointer;
 }
 
-.hidden { display: none; }
-
-#fieldGuide {
-  position: fixed;
-  top: 10%;
-  left: 10%;
-  width: 80%;
-  height: 75%;
-  background: #fdfcf7;
-  border: 3px solid #4a3;
-  border-radius: 12px;
-  padding: 1em;
-  overflow-y: auto;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  z-index: 100;
+/* Optional: style the dark mode toggle button differently in dark mode */
+body.dark button#darkModeToggle {
+  background-color: #333;
+  color: #e0e0e0;
+  border: 1px solid #555;
 }
-
-#entries { 
-  max-height: 200px; 
-  overflow-y: auto; 
-  margin-top: 1em;
-  background:#fff9e6;
-  padding:0.5em;
-  border:1px solid #ccc;
-}
-
-.new-sprout { background-color: #e0ffe0; }
-.new-pollinator { background-color: #e0f0ff; }
