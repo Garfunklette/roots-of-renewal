@@ -1,0 +1,74 @@
+Perfect — that’s a rich set of activities! Let’s map them into game mechanics and potential upgrades in a way that makes the incremental progression feel engaging, educational, and consistent with your restoration theme. I’ll also note possible UI and prestige implications.
+
+
+---
+
+1. Core Activities
+
+Activity	Mechanic	Resource / Cost	Notes / Upgrade Potential
+
+Harvest Seeds	Collect seeds from matured plants	Requires bloomed plants	Can unlock efficiency upgrades (e.g., “Seed Collector Tools” for +50% yield)
+Scatter Seeds	Plant seeds randomly in garden / plot	Seeds	Can unlock “Targeted Planting” to increase probability of high-value species
+Grow Plugs	Convert seeds into nursery plugs	Seeds + time	Upgrades: faster growth, higher survival chance, increased plug output
+Plant Plugs	Place nursery plugs into garden	Plugs	Can unlock “Precision Layout” to optimize bloom density for pollinators
+Purchase Seed Mix	Spend seeds / biodiversity points for diverse plant mix	Seeds	Upgrade: “Rare Native Mix” for higher-value species, unlocks new pollinators
+Prairie Burn	Reset mature plants for soil health / ecosystem bonus	Some plants temporarily lost	Upgrade: “Controlled Burn Technique” reduces plant loss and accelerates next growth
+Pollinator Housing	Install bee boxes, bat boxes, etc.	Seeds / plugs / time	Boosts pollinator arrival and diversity. Upgrade: larger / more effective housing
+Puddlers / Water Features	Add water sources for insects & amphibians	Seeds / plugs / space	Boosts pollinator activity in surrounding plants. Upgrade: expand water area or seasonal management
+
+
+
+---
+
+2. Upgrade / Prestige Ideas
+
+Seed Efficiency – More seeds from bloom months.
+
+Pollinator Attraction – More pollinators arrive faster or in greater numbers.
+
+Plant Health – Reduced mortality, faster sprout/growth.
+
+Diversity Multiplier – Points / impact scale with species variety, not just counts.
+
+Regional / Global Expansion – Unlock new garden plots, parks, urban areas for restoration.
+
+Knowledge / Research Points – Discover new species faster; unlock field guide blurbs and bonuses.
+
+
+
+---
+
+3. How They Fit in the Narrative
+
+Start: Your backyard — scatter seeds, plant plugs, grow basic flowers.
+
+Neighborhood: Purchase seed mixes, install pollinator housing, create mini-prairie patches.
+
+Community: Conduct prairie burns, expand garden plots, provide puddlers for insects.
+
+Regional / Global: Large-scale seed mixes, coordinate with local groups, unlock rare pollinators.
+
+
+
+---
+
+4. UI & Game Flow Suggestions
+
+Action Buttons: Harvest, Scatter, Plant Plug, etc. with cooldown / animation for clarity.
+
+Inventory Panel: Show seeds, plugs, and available upgrades.
+
+Prestige / Tier Feedback: Each tier unlocks new activities and upgrades visually.
+
+Field Guide & Journal: Show plant/pollinator relationships, include tips for each activity.
+
+Monthly Progression: Activities are more effective during bloom/seed months.
+
+
+
+---
+
+If you want, I can sketch a full “activity tree” with upgrade paths showing which activities unlock which upgrades and how they affect biodiversity and species counts. This helps structure the incremental progression clearly.
+
+Do you want me to do that next?
+
