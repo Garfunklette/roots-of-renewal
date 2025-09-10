@@ -144,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-                                 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const plantsTab = document.getElementById("plantsTab");
