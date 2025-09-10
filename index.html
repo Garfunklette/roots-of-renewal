@@ -13,7 +13,7 @@ window.onerror = function(message, source, lineno, colno, error) {
 };
 </script>
   <div>
-
+<!-- header section-->
 <p>Seeds: <span id="seedCount">0</span></p>
 <p>Plant Species: <span id="plantSpeciesCount">0</span></p>
 <p>Pollinator Species: <span id="pollinatorSpeciesCount">0</span></p>
@@ -25,24 +25,31 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 
  <button id="prestigeBtn">Advance Restoration Tier</button>
-    
-    <button onclick="openFieldGuide()">Open Field Guide</button>
-  </div>
 
-  <div id="fieldGuide" class="hidden">
-    <h2>📖 Field Guide</h2>
-    <div class="chapter-tabs">
-      <button id="plantsTab">🌿 Plants</button>
-      <button id="pollinatorsTab">🐝 Pollinators</button>
-    </div>
-    <div id="fieldGuideContent"></div>
-    <div class="page-controls">
-      <button id="prevPage">⬅️ Prev</button>
-      <span id="pageIndicator">Page 1</span>
-      <button id="nextPage">➡️ Next</button>
-    </div>
-    <button id="closeGuide" onclick="closeFieldGuide()">Close</button>
+<!-- field guide-->
+    
+    <!-- Toggle Button -->
+<button id="toggleGuideBtn">📖 Open Field Guide</button>
+
+<!-- Field Guide -->
+<div id="fieldGuide" class="hidden">
+  <!-- Close X in top-right corner -->
+  <button id="closeGuideX" class="closeX">✖</button>
+
+  <h2>📖 Field Guide</h2>
+  <div class="chapter-tabs">
+    <button id="plantsTab">🌿 Plants</button>
+    <button id="pollinatorsTab">🐝 Pollinators</button>
   </div>
+  <div id="fieldGuideContent"></div>
+  <div class="page-controls">
+    <button id="prevPage">⬅️ Prev</button>
+    <span id="pageIndicator">Page 1</span>
+    <button id="nextPage">➡️ Next</button>
+  </div>
+</div>
+
+<!--dark mode-->
 <div>
 <button id="darkModeToggle">🌙 Dark Mode</button>
 </div>
