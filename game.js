@@ -14,6 +14,87 @@ const state = {
 
 state.seedBank = []; // holds seeds waiting to sprout { plantName, plantedMonth }
 
+
+
+
+// ----- DEBUG: Manual Planting -----
+function plantSeedDebug(plantName){
+  console.log("Manual plantSeed called:", plantName);
+  const plant = PLANTS.find(p => p.name === plantName);
+
+  if(!plant){
+    console.warn("Plant not found:", plantName);
+    return;
+  }
+
+  if(state.seeds < plant.cost){
+    console.warn(`Not enough seeds! Needed: ${plant.cost}, Available: ${state.seeds}`);
+    return;
+  }
+
+  state.seeds -= plant.cost;
+  console.log(`Seeds spent: ${plant.cost}. Seeds left: ${state.seeds}`);
+
+  if(plant.sproutMonths.includes(state.currentMonth)){
+    console.log(`${plant.name} sprouts immediately!`);
+    addPlant(plant.name);
+  } else {
+    console.log(`${plant.name} added to seed bank for month ${state.currentMonth}`);
+    state.seedBank.push({ plantName: plant.name, plantedMonth: state.currentMonth });
+  }
+
+  updateUI();
+  console.log("Current seed bank:", state.seedBank);
+}
+
+// ----- DEBUG: Scatter Seeds -----
+function scatterSeedsDebug(numSeeds = 5){
+  console.log("Scatter seeds clicked. Current seeds:", state.seeds);
+
+  if(state.seeds < numSeeds){
+    console.warn("Not enough seeds to scatter!");
+    return;
+  }
+
+  state.seeds -= numSeeds;
+  console.log(`Scattering ${numSeeds} seeds... Remaining seeds: ${state.seeds}`);
+
+  for(let i=0; i<numSeeds; i++){
+    const randomPlant = PLANTS[Math.floor(Math.random() * PLANTS.length)];
+    console.log(`Selected plant: ${randomPlant.name}`);
+
+    if(randomPlant.sproutMonths.includes(state.currentMonth)){
+      console.log(`Sprouting immediately: ${randomPlant.name}`);
+      addPlant(randomPlant.name);
+    } else {
+      console.log(`Adding to seed bank: ${randomPlant.name}`);
+      state.seedBank.push({ plantName: randomPlant.name, plantedMonth: state.currentMonth });
+    }
+  }
+
+  updateUI();
+  console.log("Updated seed bank:", state.seedBank);
+}
+
+// ----- Attach buttons for testing -----
+document.addEventListener("DOMContentLoaded", () => {
+  const scatterBtn = document.getElementById("scatterBtn");
+  if(scatterBtn) scatterBtn.addEventListener("click", scatterSeedsDebug);
+
+  // For manual plant testing: create a temporary test button for each plant
+  const testContainer = document.getElementById("plantButtons");
+  if(testContainer){
+    PLANTS.forEach(p => {
+      const btn = document.createElement("button");
+      btn.textContent = `Debug Plant: ${p.name}`;
+      btn.onclick = () => plantSeedDebug(p.name);
+      testContainer.appendChild(btn);
+    });
+  }
+});
+
+
+
 // Pagination state for Field Guide
 const guideState = {
   activeTab: "plants",
