@@ -74,32 +74,4 @@ function handlePollinatorArrivals(){
       }
     }
   });
-}// Handle pollinator arrival logic
-function handlePollinatorArrivals(){
-  POLLINATORS.forEach(pol=>{
-    if(state.discoveredPollinators.has(pol.name)) return;
-
-    // Check host and food plants
-    const hasHost = pol.hostPlants.some(h=>state.plants[h] > 0);
-    const hasFood = pol.foodPlants.some(f=>state.plants[f] > 0);
-
-    if(hasHost && hasFood){
-      const hostCount = pol.hostPlants.reduce((sum,h)=>sum+(state.plants[h]||0),0);
-      const foodCount = pol.foodPlants.reduce((sum,f)=>sum+(state.plants[f]||0),0);
-      const chance = Math.min(0.2, (hostCount + foodCount) * 0.01); // up to 20%
-
-      if(Math.random() < chance){
-        addPollinator(pol.name);
-      }
-    }
-  });
-}
-
-// Utility: convert month index to name
-function getMonthName(index){
-  const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-  return months[index % 12];
 }
