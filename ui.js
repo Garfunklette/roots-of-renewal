@@ -140,13 +140,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const plantsTab = document.getElementById("plantsTab");
   const pollinatorsTab = document.getElementById("pollinatorsTab");
 
-  if (plantsTab && pollinatorsTab) {
-    plantsTab.addEventListener("click", () => {
-      buildFieldGuide("plants");
-    });
-    pollinatorsTab.addEventListener("click", () => {
-      buildFieldGuide("pollinators");
-    });
+plantsTab.addEventListener("click", () => {
+  plantsTab.classList.add("active");
+  pollinatorsTab.classList.remove("active");
+  buildFieldGuide("plants");
+});
+pollinatorsTab.addEventListener("click", () => {
+  pollinatorsTab.classList.add("active");
+  plantsTab.classList.remove("active");
+  buildFieldGuide("pollinators");
+});
   }
 
   // Default tab on load
