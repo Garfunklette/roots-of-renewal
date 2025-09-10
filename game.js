@@ -14,9 +14,6 @@ const state = {
 
 state.seedBank = []; // holds seeds waiting to sprout { plantName, plantedMonth }
 
-
-
-
 // ----- DEBUG: Manual Planting -----
 function plantSeedDebug(plantName){
   console.log("Manual plantSeed called:", plantName);
@@ -47,7 +44,7 @@ function plantSeedDebug(plantName){
   console.log("Current seed bank:", state.seedBank);
 }
 
-// ----- Scatter Seeds (unified with safety + logging) -----
+// ----- Scatter Seeds (safe + logging) -----
 function scatterSeeds(numSeeds = 5) {
   console.log("Scatter seeds clicked. Current seeds:", state.seeds);
 
@@ -82,7 +79,8 @@ function scatterSeeds(numSeeds = 5) {
 // ----- Attach buttons for testing -----
 document.addEventListener("DOMContentLoaded", () => {
   const scatterBtn = document.getElementById("scatterBtn");
-if (scatterBtn) scatterBtn.addEventListener("click", () => scatterSeeds(5));
+  if (scatterBtn) scatterBtn.addEventListener("click", () => scatterSeeds(5));
+
   // For manual plant testing: create a temporary test button for each plant
   const testContainer = document.getElementById("plantButtons");
   if(testContainer){
@@ -94,8 +92,6 @@ if (scatterBtn) scatterBtn.addEventListener("click", () => scatterSeeds(5));
     });
   }
 });
-
-
 
 // Pagination state for Field Guide
 const guideState = {
@@ -151,8 +147,6 @@ function addPollinator(name){
   buildFieldGuide(); // now in ui.js
   updateUI();        // now in ui.js
 }
-
-
 
 // Plant a random initial plant (weighted toward lower cost)
 function plantRandomInitialPlant() {
