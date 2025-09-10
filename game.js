@@ -2,7 +2,7 @@
 
 // Initialize game state
 const state = {
-  seeds: 10,
+  seeds: 1000,
   plants: {}, // { "Milkweed": 3, "Blazing Star": 5 }
   pollinators: {}, // { "Monarch": 1, "Bumblebee": 2 }
   prestigeLevel: 0,
