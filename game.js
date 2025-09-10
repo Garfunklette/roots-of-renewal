@@ -12,6 +12,13 @@ const state = {
   currentMonth: 3 // start in April (0 = Jan)
 };
 
+// Pagination state for Field Guide
+const guideState = {
+  activeTab: "plants",
+  currentPage: 0,
+  entriesPerPage: 3 // how many entries per "page"
+};
+
 // Returns current number of species
 function getSpeciesCounts(){
   return {
