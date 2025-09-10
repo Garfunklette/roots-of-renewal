@@ -47,23 +47,26 @@ function plantSeedDebug(plantName){
   console.log("Current seed bank:", state.seedBank);
 }
 
-// ----- DEBUG: Scatter Seeds -----
-function scatterSeedsDebug(numSeeds = 5){
+// ----- Scatter Seeds (unified with safety + logging) -----
+function scatterSeeds(numSeeds = 5) {
   console.log("Scatter seeds clicked. Current seeds:", state.seeds);
 
-  if(state.seeds < numSeeds){
-    console.warn("Not enough seeds to scatter!");
+  // Force seeds to be a number
+  state.seeds = parseInt(state.seeds, 10) || 0;
+
+  if (state.seeds < numSeeds) {
+    console.warn(`Not enough seeds to scatter! Needed: ${numSeeds}, Available: ${state.seeds}`);
     return;
   }
 
-  state.seeds -= numSeeds;
+  state.seeds = Math.max(0, state.seeds - numSeeds);
   console.log(`Scattering ${numSeeds} seeds... Remaining seeds: ${state.seeds}`);
 
-  for(let i=0; i<numSeeds; i++){
+  for (let i = 0; i < numSeeds; i++) {
     const randomPlant = PLANTS[Math.floor(Math.random() * PLANTS.length)];
     console.log(`Selected plant: ${randomPlant.name}`);
 
-    if(randomPlant.sproutMonths.includes(state.currentMonth)){
+    if (randomPlant.sproutMonths.includes(state.currentMonth)) {
       console.log(`Sprouting immediately: ${randomPlant.name}`);
       addPlant(randomPlant.name);
     } else {
@@ -79,8 +82,7 @@ function scatterSeedsDebug(numSeeds = 5){
 // ----- Attach buttons for testing -----
 document.addEventListener("DOMContentLoaded", () => {
   const scatterBtn = document.getElementById("scatterBtn");
-  if(scatterBtn) scatterBtn.addEventListener("click", scatterSeedsDebug);
-
+if (scatterBtn) scatterBtn.addEventListener("click", () => scatterSeeds(5));
   // For manual plant testing: create a temporary test button for each plant
   const testContainer = document.getElementById("plantButtons");
   if(testContainer){
