@@ -45,7 +45,7 @@ function showDiscoveryPopup(name,type){
 // Field Guide builder with tabs
 function buildFieldGuide(tab = guideState.activeTab) {
   guideState.activeTab = tab;
-  const guide = document.getElementById("guideContent");
+  const guide = document.getElementById("fieldGuideContent");
   guide.innerHTML = "";
 
   let entries = [];
