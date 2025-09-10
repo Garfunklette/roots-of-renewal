@@ -129,8 +129,20 @@ function renderJournal(){
   });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const prestigeBtn = document.getElementById("prestigeBtn");
+  if (prestigeBtn) {
+    prestigeBtn.addEventListener("click", () => {
+      tryPrestige(); // calls the function in prestige.js
+    });
+  }
+});
+
 // Dark mode toggle + persistence
 document.addEventListener("DOMContentLoaded", () => {
+
+  
+  
   const darkToggle = document.getElementById("darkModeToggle");
 
   // Apply saved preference on load
