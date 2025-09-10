@@ -380,7 +380,7 @@ const scatterBtn = document.getElementById("scatterBtn");
 if(scatterBtn){
   scatterBtn.addEventListener("click", scatterSeedsDebug);
         }
-}
+});
     
   // Initialize game
 window.onload = () => {
