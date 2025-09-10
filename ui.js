@@ -129,25 +129,149 @@ function renderJournal(){
   });
 }
 
-// ui.js
+// ---------- domcontentloaded? -------
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ---------- Field Guide ----------
-  const openGuideBtn = document.getElementById("openGuideBtn");
-  const closeGuideBtn = document.getElementById("closeGuide");
+  const toggleGuideBtn = document.getElementById("toggleGuideBtn");
   const fieldGuide = document.getElementById("fieldGuide");
+  const closeX = document.getElementById("closeGuideX");
+  const guideContent = document.getElementById("fieldGuideContent");
+  const prevPageBtn = document.getElementById("prevPage");
+  const nextPageBtn = document.getElementById("nextPage");
+  const pageIndicator = document.getElementById("pageIndicator");
+  const plantsTab = document.getElementById("plantsTab");
+  const pollinatorsTab = document.getElementById("pollinatorsTab");
 
-  if(openGuideBtn && fieldGuide){
-    openGuideBtn.addEventListener("click", () => {
-      fieldGuide.classList.remove("hidden");
+  // Load saved chapter and page from localStorage, defaults
+  let currentChapter = localStorage.getItem("fieldGuideChapter") || "plants";
+  let currentPage = parseInt(localStorage.getItem("fieldGuidePage") || "0", 10);
+  const entriesPerPage = 3;
+
+  function getChapterEntries() {
+    const source = currentChapter === "plants" ? state.discoveredPlants : state.discoveredPollinators;
+    return Array.from(source).sort();
+  }
+
+  function renderPage() {
+    const entries = getChapterEntries();
+    guideContent.innerHTML = "";
+
+    if(entries.length === 0){
+      guideContent.innerHTML = "<p>No entries discovered yet.</p>";
+      pageIndicator.textContent = "Page 0";
+      return;
+    }
+
+    // Clamp page number
+    const totalPages = Math.ceil(entries.length / entriesPerPage);
+    if(currentPage >= totalPages) currentPage = totalPages - 1;
+    if(currentPage < 0) currentPage = 0;
+
+    const start = currentPage * entriesPerPage;
+    const end = start + entriesPerPage;
+    const pageEntries = entries.slice(start, end);
+
+    pageEntries.forEach(name => {
+      const div = document.createElement("div");
+      div.className = "guideEntry";
+
+      if(currentChapter === "plants"){
+        const plant = PLANTS.find(p => p.name === name);
+        if(!plant) return;
+        div.innerHTML = `
+          <h3>${plant.name}</h3>
+          <p>${plant.blurb}</p>
+          <p><strong>Bloom:</strong> ${
+            plant.bloomMonths.length === 1
+              ? "Blooms in " + getMonthName(plant.bloomMonths[0])
+              : "Blooms from " + getMonthName(plant.bloomMonths[0]) + " to " + getMonthName(plant.bloomMonths[plant.bloomMonths.length-1])
+          }</p>
+          <p><strong>Height:</strong> ${plant.height}</p>
+          <p><strong>Spacing:</strong> ${plant.spacing}</p>
+          <details>
+            <summary>More details</summary>
+            <p><strong>Square Ft:</strong> ${plant.squareFeet}</p>
+            <p><strong>Cost:</strong> ${plant.cost} seeds</p>
+          </details>
+        `;
+      } else {
+        const pol = POLLINATORS.find(p => p.name === name);
+        if(!pol) return;
+        div.innerHTML = `
+          <h3>${pol.name}</h3>
+          <p>${pol.blurb}</p>
+          <p><strong>Host Plants:</strong> ${pol.hostPlants.join(", ")}</p>
+          <p><strong>Food Plants:</strong> ${pol.foodPlants.join(", ")}</p>
+        `;
+      }
+
+      guideContent.appendChild(div);
+    });
+
+    pageIndicator.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+
+    // Save current state
+    localStorage.setItem("fieldGuideChapter", currentChapter);
+    localStorage.setItem("fieldGuidePage", currentPage);
+  }
+
+  // Toggle button
+  if(toggleGuideBtn && fieldGuide){
+    toggleGuideBtn.addEventListener("click", () => {
+      const isHidden = fieldGuide.classList.toggle("hidden");
+      toggleGuideBtn.textContent = isHidden ? "📖 Open Field Guide" : "📖 Close Field Guide";
+      if(!isHidden) renderPage();
     });
   }
 
-  if(closeGuideBtn && fieldGuide){
-    closeGuideBtn.addEventListener("click", () => {
+  // X close button
+  if(closeX && fieldGuide){
+    closeX.addEventListener("click", () => {
       fieldGuide.classList.add("hidden");
+      toggleGuideBtn.textContent = "📖 Open Field Guide";
     });
   }
+
+  // Prev / Next page
+  if(prevPageBtn){
+    prevPageBtn.addEventListener("click", () => {
+      if(currentPage > 0){
+        currentPage--;
+        renderPage();
+      }
+    });
+  }
+  if(nextPageBtn){
+    nextPageBtn.addEventListener("click", () => {
+      const totalPages = Math.ceil(getChapterEntries().length / entriesPerPage);
+      if(currentPage < totalPages - 1){
+        currentPage++;
+        renderPage();
+      }
+    });
+  }
+
+  // Chapter tabs
+  if(plantsTab){
+    plantsTab.addEventListener("click", () => {
+      currentChapter = "plants";
+      currentPage = 0;
+      renderPage();
+    });
+  }
+  if(pollinatorsTab){
+    pollinatorsTab.addEventListener("click", () => {
+      currentChapter = "pollinators";
+      currentPage = 0;
+      renderPage();
+    });
+  }
+});
+
+// end field guide domcontentloaded
+
+document.addEventListener("DOMContentLoaded", () => {
+
 
   // ---------- Prestige ----------
   const prestigeBtn = document.getElementById("prestigeBtn");
