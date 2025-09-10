@@ -375,6 +375,13 @@ document.addEventListener("DOMContentLoaded", () => {
   buildFieldGuide("plants");
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+const scatterBtn = document.getElementById("scatterBtn");
+if(scatterBtn){
+  scatterBtn.addEventListener("click", scatterSeedsDebug);
+        }
+}
+    
   // Initialize game
 window.onload = () => {
   // Build shop buttons once
