@@ -12,6 +12,8 @@ const state = {
   currentMonth: 3 // start in April (0 = Jan)
 };
 
+state.seedBank = []; // holds seeds waiting to sprout { plantName, plantedMonth }
+
 // Pagination state for Field Guide
 const guideState = {
   activeTab: "plants",
