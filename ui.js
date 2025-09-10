@@ -17,6 +17,8 @@ function updateUI(){
 
   // Current month
   document.getElementById("currentMonth").textContent = getMonthName(state.currentMonth);
+
+  updateDebugUI();
 }
 
 // Plant shop
@@ -140,6 +142,21 @@ function renderJournal(){
       journal.appendChild(entry);
     }
   });
+}
+
+//debugui
+function updateDebugUI(){
+  const debugEl = document.getElementById("seedBankList");
+  if(!debugEl) return;
+
+  if(state.seedBank.length === 0){
+    debugEl.textContent = "[empty]";
+    return;
+  }
+
+  debugEl.textContent = state.seedBank
+    .map(s => `${s.plantName} (planted ${getMonthName(s.plantedMonth)})`)
+    .join(", ");
 }
 
 // ---------- domcontentloaded? -------
