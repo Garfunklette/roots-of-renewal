@@ -152,22 +152,7 @@ function addPollinator(name){
   updateUI();        // now in ui.js
 }
 
-// Scatter seeds
-function scatterSeeds(numSeeds = 5){
-  if(state.seeds < numSeeds) return;
-  state.seeds -= numSeeds;
 
-  for(let i=0; i<numSeeds; i++){
-    const randomPlant = PLANTS[Math.floor(Math.random() * PLANTS.length)];
-    if(randomPlant.sproutMonths.includes(state.currentMonth)){
-      addPlant(randomPlant.name);
-    } else {
-      state.seedBank.push({ plantName: randomPlant.name, plantedMonth: state.currentMonth });
-    }
-  }
-
-  updateUI();
-}
 
 // Plant a random initial plant (weighted toward lower cost)
 function plantRandomInitialPlant() {
