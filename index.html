@@ -23,23 +23,15 @@ window.onerror = function(message, source, lineno, colno, error) {
 <div id="prestigeMessage"></div>
 <p>Current Month: <span id="currentMonth">April</span></p>
 
-    <!--scatter seeds-->
-<button id="scatterBtn">🌱 Scatter Seeds</button>
-    
-    <!--plant shop-->
-<div id="plantShop">
-  <h3>🌱 Plant Shop</h3>
-  <div id="plantButtons"></div>
-
-  <div id="debugPanel">
-  <h3>🔧 Debug</h3>
-  <p>Seed Bank: <span id="seedBankList">[empty]</span></p>
-  </div>
+<!-- Debug UI -->
+<div id="debugSection" style="border:1px solid #aaa; padding:5px; margin:5px; font-size:0.9em;">
+  <h3>🌱 Debug Info</h3>
+  <p>Seeds: <span id="debugSeeds">0</span></p>
+  <p>Seed Bank:</p>
+  <ul id="debugSeedBank"></ul>
 </div>
 
-    <!--Prestige-->
- <button id="prestigeBtn">Advance Restoration Tier</button>
-
+<button id="prestigeBtn">Advance Restoration Tier</button>
 <!-- field guide-->
     
     <!-- Toggle Button -->
