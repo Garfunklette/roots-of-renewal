@@ -5,6 +5,21 @@ body {
   font-family: sans-serif;
 }
 
+#fieldGuide {
+  border: 2px solid #666;
+  padding: 1em;
+  margin-top: 1em;
+  max-width: 600px;
+  background: #fafafa;
+}
+
+.page-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+  margin-top: 1em;
+}
+
 .chapter-tabs button.active {
   background: #4caf50;
   color: white;
