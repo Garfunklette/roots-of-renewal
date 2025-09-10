@@ -145,22 +145,55 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
                                  }
+
 document.addEventListener("DOMContentLoaded", () => {
   const plantsTab = document.getElementById("plantsTab");
   const pollinatorsTab = document.getElementById("pollinatorsTab");
+  const prevPage = document.getElementById("prevPage");
+  const nextPage = document.getElementById("nextPage");
 
-plantsTab.addEventListener("click", () => {
-  plantsTab.classList.add("active");
-  pollinatorsTab.classList.remove("active");
-  buildFieldGuide("plants");
-});
-pollinatorsTab.addEventListener("click", () => {
-  pollinatorsTab.classList.add("active");
-  plantsTab.classList.remove("active");
-  buildFieldGuide("pollinators");
-});
+  if (plantsTab && pollinatorsTab) {
+    plantsTab.addEventListener("click", () => {
+      guideState.currentPage = 0;
+      plantsTab.classList.add("active");
+      pollinatorsTab.classList.remove("active");
+      buildFieldGuide("plants");
+    });
+
+    pollinatorsTab.addEventListener("click", () => {
+      guideState.currentPage = 0;
+      pollinatorsTab.classList.add("active");
+      plantsTab.classList.remove("active");
+      buildFieldGuide("pollinators");
+    });
   }
 
-  // Default tab on load
+  if (prevPage) {
+    prevPage.addEventListener("click", () => {
+      if (guideState.currentPage > 0) {
+        guideState.currentPage--;
+        buildFieldGuide();
+      }
+    });
+  }
+
+  if (nextPage) {
+    nextPage.addEventListener("click", () => {
+      const totalEntries =
+        guideState.activeTab === "plants"
+          ? state.discoveredPlants.size
+          : state.discoveredPollinators.size;
+      const maxPage = Math.ceil(totalEntries / guideState.entriesPerPage) - 1;
+      if (guideState.currentPage < maxPage) {
+        guideState.currentPage++;
+        buildFieldGuide();
+      }
+    });
+  }
+
+  // Default tab
+  plantsTab.classList.add("active");
   buildFieldGuide("plants");
 });
+
+  
