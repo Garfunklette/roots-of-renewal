@@ -19,6 +19,19 @@ function updateUI(){
   document.getElementById("currentMonth").textContent = getMonthName(state.currentMonth);
 }
 
+// Plant shop
+function buildPlantShop(){
+  const container = document.getElementById("plantButtons");
+  container.innerHTML = "";
+
+  PLANTS.forEach(plant=>{
+    const btn = document.createElement("button");
+    btn.textContent = `🌱 ${plant.name} (${plant.cost} seeds)`;
+    btn.onclick = ()=>plantSeed(plant.name);
+    container.appendChild(btn);
+  });
+}
+
 // Discovery popup
 function showDiscoveryPopup(name,type){
   let blurb="";
@@ -345,4 +358,27 @@ document.addEventListener("DOMContentLoaded", () => {
   buildFieldGuide("plants");
 });
 
-  
+  // Initialize game
+window.onload = () => {
+  // Build shop buttons once
+  if (typeof buildPlantShopUI === "function") {
+    buildPlantShopUI();
+  }
+
+  // Draw UI at game start
+  updateUI();
+
+  // Start with one random plant
+  plantRandomInitialPlant();
+
+  // Start with one random pollinator (for testing)
+  if (POLLINATORS && POLLINATORS.length > 0) {
+    const randomPol = POLLINATORS[Math.floor(Math.random() * POLLINATORS.length)];
+    addPollinator(randomPol.name);
+  }
+
+  // Begin month advancement
+  if (typeof startMonthProgression === "function") {
+    startMonthProgression(3000); // 3 sec per month (for testing)
+  }
+};
