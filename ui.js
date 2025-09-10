@@ -129,27 +129,41 @@ function renderJournal(){
   });
 }
 
+// ui.js
+
 document.addEventListener("DOMContentLoaded", () => {
-  const prestigeBtn = document.getElementById("prestigeBtn");
-  if (prestigeBtn) {
-    prestigeBtn.addEventListener("click", () => {
-      tryPrestige(); // calls the function in prestige.js
+  // ---------- Field Guide ----------
+  const openGuideBtn = document.getElementById("openGuideBtn");
+  const closeGuideBtn = document.getElementById("closeGuide");
+  const fieldGuide = document.getElementById("fieldGuide");
+
+  if(openGuideBtn && fieldGuide){
+    openGuideBtn.addEventListener("click", () => {
+      fieldGuide.classList.remove("hidden");
     });
   }
-});
 
-// Dark mode toggle + persistence
-document.addEventListener("DOMContentLoaded", () => {
+  if(closeGuideBtn && fieldGuide){
+    closeGuideBtn.addEventListener("click", () => {
+      fieldGuide.classList.add("hidden");
+    });
+  }
 
-  
-  
+  // ---------- Prestige ----------
+  const prestigeBtn = document.getElementById("prestigeBtn");
+  if(prestigeBtn){
+    prestigeBtn.addEventListener("click", () => {
+      if(typeof tryPrestige === "function") tryPrestige(); // from prestige.js
+    });
+  }
+
+  // ---------- Dark Mode ----------
   const darkToggle = document.getElementById("darkModeToggle");
-
-  // Apply saved preference on load
-  const savedDark = localStorage.getItem("darkMode") === "1";
-  if(savedDark) document.body.classList.add("dark");
-
   if(darkToggle){
+    // Apply saved preference
+    const savedDark = localStorage.getItem("darkMode") === "1";
+    if(savedDark) document.body.classList.add("dark");
+
     darkToggle.addEventListener("click", () => {
       const isDark = document.body.classList.toggle("dark");
       localStorage.setItem("darkMode", isDark ? "1" : "0");
