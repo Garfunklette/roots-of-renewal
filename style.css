@@ -5,6 +5,11 @@ body {
   font-family: sans-serif;
 }
 
+.chapter-tabs button.active {
+  background: #4caf50;
+  color: white;
+}
+
 /* Dark mode */
 body.dark {
   background-color: #121212;
@@ -30,3 +35,5 @@ body.dark button#darkModeToggle {
   color: #e0e0e0;
   border: 1px solid #555;
 }
+
+
