@@ -1,6 +1,7 @@
 // ui.js
 
 // Update UI counters
+// Update UI counters
 function updateUI(){
   // Seeds
   document.getElementById("seedCount").textContent = state.seeds;
@@ -18,7 +19,57 @@ function updateUI(){
   // Current month
   document.getElementById("currentMonth").textContent = getMonthName(state.currentMonth);
 
-  updateDebugUI();
+  // --- Debug UI ---
+  const seedsEl = document.getElementById("debugSeeds");
+  const seedBankEl = document.getElementById("debugSeedBank");
+  const plantsEl = document.getElementById("debugPlants");
+  const pollinatorsEl = document.getElementById("debugPollinators");
+
+  if (seedsEl) seedsEl.textContent = state.seeds;
+
+  // Seed bank
+  if (seedBankEl) {
+    seedBankEl.innerHTML = "";
+    if (state.seedBank.length === 0) {
+      seedBankEl.innerHTML = "<li>[empty]</li>";
+    } else {
+      state.seedBank.forEach(seed => {
+        const li = document.createElement("li");
+        li.textContent = `${seed.plantName} (planted in ${getMonthName(seed.plantedMonth)})`;
+        seedBankEl.appendChild(li);
+      });
+    }
+  }
+
+  // Plants
+  if (plantsEl) {
+    plantsEl.innerHTML = "";
+    const names = Object.keys(state.plants);
+    if (names.length === 0) {
+      plantsEl.innerHTML = "<li>[none]</li>";
+    } else {
+      names.forEach(name => {
+        const li = document.createElement("li");
+        li.textContent = `${name}: ${state.plants[name]}`;
+        plantsEl.appendChild(li);
+      });
+    }
+  }
+
+  // Pollinators
+  if (pollinatorsEl) {
+    pollinatorsEl.innerHTML = "";
+    const names = Object.keys(state.pollinators);
+    if (names.length === 0) {
+      pollinatorsEl.innerHTML = "<li>[none]</li>";
+    } else {
+      names.forEach(name => {
+        const li = document.createElement("li");
+        li.textContent = `${name}: ${state.pollinators[name]}`;
+        pollinatorsEl.appendChild(li);
+      });
+    }
+  }
 }
 
 // Plant shop
