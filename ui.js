@@ -1,33 +1,39 @@
 // ui.js
 
-// Update UI counters
-// Update UI counters
+// Update UI counters (safe version)
 function updateUI(){
+  // Helper: safely update text if element exists
+  function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
   // Seeds
-  document.getElementById("seedCount").textContent = state.seeds;
+  setText("seedCount", state.seeds);
 
   // Species counts
   const { plantCount, pollinatorCount } = getSpeciesCounts();
-  document.getElementById("plantSpeciesCount").textContent = plantCount;
-  document.getElementById("pollinatorSpeciesCount").textContent = pollinatorCount;
+  setText("plantSpeciesCount", plantCount);
+  setText("pollinatorSpeciesCount", pollinatorCount);
 
   // Prestige info
-  document.getElementById("prestigeLevel").textContent = state.prestigeLevel;
-  document.getElementById("prestigeTierName").textContent = getCurrentTier().name;
-  document.getElementById("globalImpactPoints").textContent = state.globalImpactPoints;
+  setText("prestigeLevel", state.prestigeLevel);
+  if (typeof getCurrentTier === "function") {
+    const tier = getCurrentTier();
+    if (tier) setText("prestigeTierName", tier.name);
+  }
+  setText("globalImpactPoints", state.globalImpactPoints);
 
   // Current month
-  document.getElementById("currentMonth").textContent = getMonthName(state.currentMonth);
+  if (typeof getMonthName === "function") {
+    setText("currentMonth", getMonthName(state.currentMonth));
+  }
 
   // --- Debug UI ---
-  const seedsEl = document.getElementById("debugSeeds");
-  const seedBankEl = document.getElementById("debugSeedBank");
-  const plantsEl = document.getElementById("debugPlants");
-  const pollinatorsEl = document.getElementById("debugPollinators");
-
-  if (seedsEl) seedsEl.textContent = state.seeds;
+  setText("debugSeeds", state.seeds);
 
   // Seed bank
+  const seedBankEl = document.getElementById("debugSeedBank");
   if (seedBankEl) {
     seedBankEl.innerHTML = "";
     if (state.seedBank.length === 0) {
@@ -42,6 +48,7 @@ function updateUI(){
   }
 
   // Plants
+  const plantsEl = document.getElementById("debugPlants");
   if (plantsEl) {
     plantsEl.innerHTML = "";
     const names = Object.keys(state.plants);
@@ -57,6 +64,7 @@ function updateUI(){
   }
 
   // Pollinators
+  const pollinatorsEl = document.getElementById("debugPollinators");
   if (pollinatorsEl) {
     pollinatorsEl.innerHTML = "";
     const names = Object.keys(state.pollinators);
@@ -70,7 +78,7 @@ function updateUI(){
       });
     }
   }
-}
+  }
 
 // Plant shop
 function buildPlantShop(){
