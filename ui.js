@@ -10,51 +10,51 @@ function setText(id, text) {
   if (el) el.textContent = text;
 }
 
-// Update UI counters and debug panels
+// -----------------------------
+// UI Updates
+// -----------------------------
+
 function updateUI() {
   setText("seedCount", state.seeds);
+
   const { plantCount, pollinatorCount } = getSpeciesCounts();
   setText("plantSpeciesCount", plantCount);
   setText("pollinatorSpeciesCount", pollinatorCount);
+
   setText("prestigeLevel", state.prestigeLevel);
   if (typeof getCurrentTier === "function") {
     const tier = getCurrentTier();
     if (tier) setText("prestigeTierName", tier.name);
   }
   setText("globalImpactPoints", state.globalImpactPoints);
+
   if (typeof getMonthName === "function") setText("currentMonth", getMonthName(state.currentMonth));
 
-  // Debug Panels
   updateDebugUI();
 }
 
-// Update debug panels
+// -----------------------------
+// Debug Panel
+// -----------------------------
+
 function updateDebugUI() {
-  const seedBankEl = document.getElementById("debugSeedBank");
-  if (seedBankEl) {
-    seedBankEl.innerHTML = state.seedBank.length
-      ? state.seedBank.map(s => `<li>${s.plantName} (planted ${getMonthName(s.plantedMonth)})</li>`).join("")
-      : "<li>[empty]</li>";
-  }
+  const panels = [
+    { id: "debugSeeds", content: state.seeds },
+    { id: "debugSeedBank", content: state.seedBank.map(s => `${s.plantName} (planted ${getMonthName(s.plantedMonth)})`).join(", ") || "[empty]" },
+    { id: "debugPlants", content: Object.keys(state.plants).map(n => `${n}: ${state.plants[n]}`).join(", ") || "[none]" },
+    { id: "debugPollinators", content: Object.keys(state.pollinators).map(n => `${n}: ${state.pollinators[n]}`).join(", ") || "[none]" },
+  ];
 
-  const plantsEl = document.getElementById("debugPlants");
-  if (plantsEl) {
-    const names = Object.keys(state.plants);
-    plantsEl.innerHTML = names.length
-      ? names.map(n => `<li>${n}: ${state.plants[n]}</li>`).join("")
-      : "<li>[none]</li>";
-  }
-
-  const pollinatorsEl = document.getElementById("debugPollinators");
-  if (pollinatorsEl) {
-    const names = Object.keys(state.pollinators);
-    pollinatorsEl.innerHTML = names.length
-      ? names.map(n => `<li>${n}: ${state.pollinators[n]}</li>`).join("")
-      : "<li>[none]</li>";
-  }
+  panels.forEach(p => {
+    const el = document.getElementById(p.id);
+    if (el) el.textContent = p.content;
+  });
 }
 
-// Show discovery popup
+// -----------------------------
+// Discovery Popup
+// -----------------------------
+
 function showDiscoveryPopup(name, type) {
   let blurb = "";
   if (type === "plant") {
@@ -77,7 +77,10 @@ function showDiscoveryPopup(name, type) {
   setTimeout(() => popup.remove(), 6000);
 }
 
-// Build Plant Shop buttons
+// -----------------------------
+// Plant Shop
+// -----------------------------
+
 function buildPlantShopUI() {
   const container = document.getElementById("plantButtons");
   if (!container) return;
@@ -86,24 +89,25 @@ function buildPlantShopUI() {
   PLANTS.forEach(plant => {
     const btn = document.createElement("button");
     btn.textContent = `🌱 ${plant.name} (${plant.cost} seeds)`;
-    btn.onclick = () => plantSeed(plant.name); // from game.js
+    btn.onclick = () => plantSeed(plant.name); // game.js
     container.appendChild(btn);
   });
 }
 
-// Field Guide builder
+// -----------------------------
+// Field Guide
+// -----------------------------
+
 function buildFieldGuide(tab = guideState.activeTab) {
   guideState.activeTab = tab;
   const guide = document.getElementById("fieldGuideContent");
   if (!guide) return;
   guide.innerHTML = "";
 
-  let entries = [];
-  if (tab === "plants") {
-    entries = Array.from(state.discoveredPlants).sort().map(name => PLANTS.find(p => p.name === name));
-  } else {
-    entries = Array.from(state.discoveredPollinators).sort().map(name => POLLINATORS.find(p => p.name === name));
-  }
+  const sourceSet = tab === "plants" ? state.discoveredPlants : state.discoveredPollinators;
+  const entries = Array.from(sourceSet).sort().map(name =>
+    tab === "plants" ? PLANTS.find(p => p.name === name) : POLLINATORS.find(p => p.name === name)
+  );
 
   if (!entries.length) {
     guide.innerHTML = "<p>No entries discovered yet.</p>";
@@ -158,12 +162,8 @@ function buildFieldGuide(tab = guideState.activeTab) {
 // DOM Event Bindings
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  // Plant Shop
   buildPlantShopUI();
-
-  // Scatter Button
-  const scatterBtn = document.getElementById("scatterBtn");
-  if (scatterBtn) scatterBtn.addEventListener("click", () => scatterSeeds(5));
+  updateUI();
 
   // Field Guide Tabs
   const plantsTab = document.getElementById("plantsTab");
@@ -210,16 +210,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // Dark Mode Toggle
   const darkToggle = document.getElementById("darkModeToggle");
   if (darkToggle) {
-    const savedDark = localStorage.getItem("darkMode") === "1";
-    if (savedDark) document.body.classList.add("dark");
+    if (localStorage.getItem("darkMode") === "1") document.body.classList.add("dark");
     darkToggle.addEventListener("click", () => {
       const isDark = document.body.classList.toggle("dark");
       localStorage.setItem("darkMode", isDark ? "1" : "0");
     });
   }
+
+  // Scatter Debug Button
+  const scatterBtn = document.getElementById("scatterBtn");
+  if (scatterBtn) scatterBtn.addEventListener("click", () => scatterSeeds(5));
 });
 
-// Initialize UI at game start
+// Initialize UI on window load
 window.onload = () => {
   updateUI();
   buildPlantShopUI();
