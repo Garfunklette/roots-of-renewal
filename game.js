@@ -150,13 +150,6 @@ function plantRandomInitialPlant(){
   addPlant(randomPlant.name);
 }
 
-// ---------- Field Guide Pagination ----------
-const guideState = {
-  activeTab: "plants",
-  currentPage: 0,
-  entriesPerPage: 3
-};
-
 // ---------- DOM Wiring ----------
 document.addEventListener("DOMContentLoaded", () => {
   // Scatter seeds
