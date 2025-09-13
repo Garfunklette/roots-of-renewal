@@ -78,6 +78,39 @@ function updateUI(){
       });
     }
   }
+}
+
+  // Plants
+  const plantsEl = document.getElementById("debugPlants");
+  if (plantsEl) {
+    plantsEl.innerHTML = "";
+    const names = Object.keys(state.plants);
+    if (names.length === 0) {
+      plantsEl.innerHTML = "<li>[none]</li>";
+    } else {
+      names.forEach(name => {
+        const li = document.createElement("li");
+        li.textContent = `${name}: ${state.plants[name]}`;
+        plantsEl.appendChild(li);
+      });
+    }
+  }
+
+  // Pollinators
+  const pollinatorsEl = document.getElementById("debugPollinators");
+  if (pollinatorsEl) {
+    pollinatorsEl.innerHTML = "";
+    const names = Object.keys(state.pollinators);
+    if (names.length === 0) {
+      pollinatorsEl.innerHTML = "<li>[none]</li>";
+    } else {
+      names.forEach(name => {
+        const li = document.createElement("li");
+        li.textContent = `${name}: ${state.pollinators[name]}`;
+        pollinatorsEl.appendChild(li);
+      });
+    }
+  }
   }
 
 // Plant shop
