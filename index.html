@@ -13,16 +13,20 @@ window.onerror = function(message, source, lineno, colno, error) {
 };
   </script>
   <div>
-<!-- header section-->
-<p>Seeds: <span id="seedCount">0</span></p>
-<p>Plant Species: <span id="plantSpeciesCount">0</span></p>
-<p>Pollinator Species: <span id="pollinatorSpeciesCount">0</span></p>
-<p>Prestige Level: <span id="prestigeLevel">0</span></p>
-<p>Current Tier: <span id="prestigeTierName">Own Garden</span></p>
-<p>Global Impact (Species Count): <span id="globalImpactPoints">0</span></p>
-<div id="prestigeMessage"></div>
-<p>Current Month: <span id="currentMonth">April</span></p>
+  🌱 Seeds: <span id="seedCount">0</span><br>
+  🌿 Plants: <span id="plantSpeciesCount">0</span><br>
+  🐝 Pollinators: <span id="pollinatorSpeciesCount">0</span><br>
+  ⭐ Prestige: <span id="prestigeLevel">0</span> (<span id="prestigeTierName">None</span>)<br>
+  🌍 Impact: <span id="globalImpactPoints">0</span><br>
+  📅 Month: <span id="currentMonth">April</span>
+</div>
 
+<hr>
+<h3>Debug Info</h3>
+<p>Seeds: <span id="debugSeeds"></span></p>
+<ul id="debugSeedBank"></ul>
+<ul id="debugPlants"></ul>
+<ul id="debugPollinators"></ul>
 <!--scatter seeds-->
 <button id="scatterSeedsBtn">🌱 Scatter Seeds</button>
     
