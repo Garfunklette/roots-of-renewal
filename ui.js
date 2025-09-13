@@ -357,8 +357,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Prev / Next page
   if(prevPageBtn){
     prevPageBtn.addEventListener("click", () => {
-      if(currentPage > 0){
-        currentPage--;
+      if(guideState.currentPage > 0){
+        guideState.currentPage--;
         renderPage();
       }
     });
@@ -366,8 +366,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if(nextPageBtn){
     nextPageBtn.addEventListener("click", () => {
       const totalPages = Math.ceil(getChapterEntries().length / entriesPerPage);
-      if(currentPage < totalPages - 1){
-        currentPage++;
+      if(guideState.currentPage < totalPages - 1){
+        guideState.currentPage++;
         renderPage();
       }
     });
@@ -377,14 +377,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if(plantsTab){
     plantsTab.addEventListener("click", () => {
       currentChapter = "plants";
-      currentPage = 0;
+      guideState.currentPage = 0;
       renderPage();
     });
   }
   if(pollinatorsTab){
     pollinatorsTab.addEventListener("click", () => {
       currentChapter = "pollinators";
-      currentPage = 0;
+      guideState.currentPage = 0;
       renderPage();
     });
   }
