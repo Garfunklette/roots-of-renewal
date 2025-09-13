@@ -7,18 +7,7 @@ const guideState = {
   entriesPerPage: 3
 };
 
-// ---------- Game State ----------
-const state = {
-  seeds: 1000,
-  plants: {},           // { "Milkweed": 3, "Blazing Star": 5 }
-  pollinators: {},      // { "Monarch Butterfly": 1 }
-  prestigeLevel: 0,
-  globalImpactPoints: 0,
-  discoveredPlants: new Set(),
-  discoveredPollinators: new Set(),
-  currentMonth: 3,      // 0 = Jan
-  seedBank: []          // { plantName, plantedMonth }
-};
+
 
 // ---------- Helpers ----------
 function setText(id, text){
