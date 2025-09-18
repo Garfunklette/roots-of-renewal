@@ -13,17 +13,46 @@ const state = {
   seedBank: []          // { plantName, plantedMonth }
 };
 
-// ---------- Debugging / Manual Planting ----------
-function plantSeedDebug(plantName){
+// ----- Field Guide Pagination -----
+const guideState = {
+  activeTab: "plants",
+  currentPage: 0,
+  entriesPerPage: 3
+};
+
+// ----- Species Counts -----
+function getSpeciesCounts(){
+  return {
+    plantCount: Object.keys(state.plants).length,
+    pollinatorCount: Object.keys(state.pollinators).length
+  };
+}
+
+// ----- Plant Helpers -----
+function addPlant(name){
+  if(!state.plants[name]) state.plants[name] = 0;
+  state.plants[name]++;
+
+  if(!state.discoveredPlants.has(name)){
+    state.discoveredPlants.add(name);
+    showDiscoveryPopup(name, "plant");
+  }
+
+  // Check for pollinator arrivals
+  POLLINATORS.forEach(p => {
+    if(!state.discoveredPollinators.has(p.name)){
+      tryPollinatorArrival(p.name);
+    }
+  });
+
+  buildFieldGuide();
+  updateUI();
+}
+
+// Plant a seed manually
+function plantSeed(plantName){
   const plant = PLANTS.find(p => p.name === plantName);
-  if(!plant){
-    console.warn("Plant not found:", plantName);
-    return;
-  }
-  if(state.seeds < plant.cost){
-    console.warn(`Not enough seeds! Needed: ${plant.cost}, Available: ${state.seeds}`);
-    return;
-  }
+  if(!plant || state.seeds < plant.cost) return;
 
   state.seeds -= plant.cost;
 
@@ -35,6 +64,7 @@ function plantSeedDebug(plantName){
 
   updateUI();
 }
+
 
 // ---------- Scatter Seeds ----------
 function scatterSeeds(numSeeds = 5) {
@@ -50,7 +80,32 @@ function scatterSeeds(numSeeds = 5) {
       state.seedBank.push({ plantName: randomPlant.name, plantedMonth: state.currentMonth });
     }
   }
+}
 
+    // Plant a random initial plant
+function plantRandomInitialPlant() {
+  const weightedPlants = [];
+  PLANTS.forEach(plant => {
+    const weight = Math.max(1, Math.floor(50 / plant.cost));
+    for(let i = 0; i < weight; i++) weightedPlants.push(plant);
+  });
+
+  const randomPlant = weightedPlants[Math.floor(Math.random() * weightedPlants.length)];
+  addPlant(randomPlant.name);
+}
+
+// ----- Pollinator Helpers -----
+function addPollinator(name){
+  if(!state.pollinators[name]) state.pollinators[name] = 0;
+  state.pollinators[name]++;
+
+  if(!state.discoveredPollinators.has(name)){
+    state.discoveredPollinators.add(name);
+    showDiscoveryPopup(name, "pollinator");
+
+  }
+
+  buildFieldGuide();
   updateUI();
 }
 
@@ -89,6 +144,14 @@ function plantSeed(plantName){
   const plant = PLANTS.find(p => p.name === plantName);
   if(!plant || state.seeds < plant.cost) return;
 
+ 
+  
+// ----- Debugging / Scatter Seeds -----
+function plantSeedDebug(plantName){
+  const plant = PLANTS.find(p => p.name === plantName);
+  if(!plant) return;
+  
+  if(state.seeds < plant.cost) return;
   state.seeds -= plant.cost;
   if(plant.sproutMonths.includes(state.currentMonth)){
     addPlant(plantName);
@@ -146,9 +209,6 @@ function advanceMonth(){
   updateUI();
 }
 
-function startMonthProgression(interval = 3000){
-  setInterval(advanceMonth, interval);
-}
 
 // ---------- Random Initial Plant ----------
 function plantRandomInitialPlant(){
@@ -171,13 +231,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const testContainer = document.getElementById("plantButtons");
   if(testContainer){
     PLANTS.forEach(p => {
-      const btn = document.createElement("button");
-      btn.textContent = `Debug Plant: ${p.name}`;
-      btn.onclick = ()=>plantSeedDebug(p.name);
-      testContainer.appendChild(btn);
-    });
+
+function scatterSeeds(numSeeds = 5){
+  state.seeds = parseInt(state.seeds,10) || 0;
+  if(state.seeds < numSeeds) return;
+
+  state.seeds -= numSeeds;
+
+  for(let i=0;i<numSeeds;i++){
+    const randomPlant = PLANTS[Math.floor(Math.random()*PLANTS.length)];
+    if(randomPlant.sproutMonths.includes(state.currentMonth)){
+      addPlant(randomPlant.name);
+    } else {
+      state.seedBank.push({ plantName: randomPlant.name, plantedMonth: state.currentMonth });
+    }
   }
-});
+
+  updateUI();
+}
+
+// ----- Month Progression -----
+function advanceMonth(){
+  state.currentMonth = (state.currentMonth + 1) % 12;
+
+  // Sprout seeds in seedBank
+  const sprouting = state.seedBank.filter(s => PLANTS.find(p=>p.name===s.plantName).sproutMonths.includes(state.currentMonth));
+  sprouting.forEach(s => addPlant(s.plantName));
+
+  // Remove sprouted seeds
+  state.seedBank = state.seedBank.filter(s => !sprouting.includes(s));
+
+  updateUI();
+}
+
+// Optional: automated month progression
+function startMonthProgression(interval=3000){
+  setInterval(advanceMonth, interval);
+}
+
+
 
 // ---------- Game Initialization ----------
 window.onload = () => {
@@ -185,3 +277,4 @@ window.onload = () => {
   plantRandomInitialPlant();
   if(typeof startMonthProgression === "function") startMonthProgression(3000);
 };
+
