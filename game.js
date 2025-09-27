@@ -1,46 +1,67 @@
 // game.js
 
-// ---------- Game State ----------
+// ==================== GAME STATE ====================
+
 const state = {
-  seeds: 1000,
-  plants: {},           // { "Milkweed": 3, "Blazing Star": 5 }
-  pollinators: {},      // { "Monarch Butterfly": 1 }
-  prestigeLevel: 0,
-  globalImpactPoints: 0,
+  lots: [
+    {
+      name: "Lot 1",
+      capacitySqFt: 50,
+      usedSqFt: 0,
+      plants: {},       // { speciesName: count }
+      pollinators: {},  // { pollinatorName: count }
+      seedBank: []      // [{ plantName, plantedMonth }]
+    }
+  ],
+  activeLot: 0,
+  currentMonth: 5, // May start
+  year: 1,
+
   discoveredPlants: new Set(),
-  discoveredPollinators: new Set(),
-  currentMonth: 3,      // 0 = Jan
-  seedBank: []          // { plantName, plantedMonth }
+  discoveredPollinators: new Set()
 };
 
-// ----- Field Guide Pagination -----
-const guideState = {
-  activeTab: "plants",
-  currentPage: 0,
-  entriesPerPage: 3
-};
+// ==================== HELPERS ====================
 
-// ----- Species Counts -----
-function getSpeciesCounts(){
-  return {
-    plantCount: Object.keys(state.plants).length,
-    pollinatorCount: Object.keys(state.pollinators).length
-  };
+function getActiveLot() {
+  return state.lots[state.activeLot];
 }
 
-// ----- Plant Helpers -----
-function addPlant(name){
-  if(!state.plants[name]) state.plants[name] = 0;
-  state.plants[name]++;
+function findPlantDef(name) {
+  return PLANTS.find(p => p.name === name);
+}
 
-  if(!state.discoveredPlants.has(name)){
+function findPollinatorDef(name) {
+  return POLLINATORS.find(p => p.name === name);
+}
+
+// ==================== PLANTING ====================
+
+function addPlant(name) {
+  const lot = getActiveLot();
+  const plantDef = findPlantDef(name);
+  if (!plantDef) return;
+
+  const size = plantDef.squareFootage || 1;
+
+  if (lot.usedSqFt + size > lot.capacitySqFt) {
+    // Overflow to seed bank
+    lot.seedBank.push({ plantName: name, plantedMonth: state.currentMonth });
+    return;
+  }
+
+  if (!lot.plants[name]) lot.plants[name] = 0;
+  lot.plants[name]++;
+  lot.usedSqFt += size;
+
+  if (!state.discoveredPlants.has(name)) {
     state.discoveredPlants.add(name);
     showDiscoveryPopup(name, "plant");
   }
 
-  // Check for pollinator arrivals
+  // Pollinator checks
   POLLINATORS.forEach(p => {
-    if(!state.discoveredPollinators.has(p.name)){
+    if (!state.discoveredPollinators.has(p.name)) {
       tryPollinatorArrival(p.name);
     }
   });
@@ -49,232 +70,113 @@ function addPlant(name){
   updateUI();
 }
 
-// Plant a seed manually
-function plantSeed(plantName){
-  const plant = PLANTS.find(p => p.name === plantName);
-  if(!plant || state.seeds < plant.cost) return;
-
-  state.seeds -= plant.cost;
-
-  if(plant.sproutMonths.includes(state.currentMonth)){
-    addPlant(plant.name);
-  } else {
-    state.seedBank.push({ plantName: plant.name, plantedMonth: state.currentMonth });
+function plantSeed(name) {
+  const lot = getActiveLot();
+  const index = lot.seedBank.findIndex(s => s.plantName === name);
+  if (index !== -1) {
+    addPlant(name);
+    lot.seedBank.splice(index, 1);
   }
-
-  updateUI();
 }
 
+// ==================== ADVANCEMENT ====================
 
-// ---------- Scatter Seeds ----------
-function scatterSeeds(numSeeds = 5) {
-  state.seeds = parseInt(state.seeds, 10) || 0;
-  if(state.seeds < numSeeds) return;
-  state.seeds -= numSeeds;
+function advanceMonth() {
+  state.currentMonth++;
+  if (state.currentMonth > 12) {
+    state.currentMonth = 1;
+    state.year++;
+  }
 
-  for(let i=0;i<numSeeds;i++){
-    const randomPlant = PLANTS[Math.floor(Math.random() * PLANTS.length)];
-    if(randomPlant.sproutMonths.includes(state.currentMonth)){
-      addPlant(randomPlant.name);
-    } else {
-      state.seedBank.push({ plantName: randomPlant.name, plantedMonth: state.currentMonth });
+  const lot = getActiveLot();
+
+  // Sprout seeds if in sprout season
+  for (let i = lot.seedBank.length - 1; i >= 0; i--) {
+    const seed = lot.seedBank[i];
+    const plantDef = findPlantDef(seed.plantName);
+    if (plantDef && plantDef.sproutMonths.includes(state.currentMonth)) {
+      addPlant(seed.plantName);
+      lot.seedBank.splice(i, 1);
     }
   }
-}
 
-    // Plant a random initial plant
-function plantRandomInitialPlant() {
-  const weightedPlants = [];
-  PLANTS.forEach(plant => {
-    const weight = Math.max(1, Math.floor(50 / plant.cost));
-    for(let i = 0; i < weight; i++) weightedPlants.push(plant);
+  // Self-seeding: plants spread a fraction each month
+  Object.keys(lot.plants).forEach(speciesName => {
+    const plantDef = findPlantDef(speciesName);
+    if (!plantDef) return;
+    const count = lot.plants[speciesName];
+    const spreadCount = Math.floor(count * 0.2);
+    for (let i = 0; i < spreadCount; i++) {
+      addPlant(speciesName);
+    }
   });
 
-  const randomPlant = weightedPlants[Math.floor(Math.random() * weightedPlants.length)];
-  addPlant(randomPlant.name);
-}
-
-// ----- Pollinator Helpers -----
-function addPollinator(name){
-  if(!state.pollinators[name]) state.pollinators[name] = 0;
-  state.pollinators[name]++;
-
-  if(!state.discoveredPollinators.has(name)){
-    state.discoveredPollinators.add(name);
-    showDiscoveryPopup(name, "pollinator");
-
-  }
-
-  buildFieldGuide();
-  updateUI();
-}
-
-// ---------- Species Helpers ----------
-function getSpeciesCounts(){
-  return {
-    plantCount: Object.keys(state.plants).length,
-    pollinatorCount: Object.keys(state.pollinators).length
-  };
-}
-
-function addPlant(name){
-  if(!state.plants[name]) state.plants[name]=0;
-  state.plants[name]++;
-  if(!state.discoveredPlants.has(name)){
-    state.discoveredPlants.add(name);
-    showDiscoveryPopup(name,"plant");
-  }
-  buildFieldGuide();
-  updateUI();
-}
-
-function addPollinator(name){
-  if(!state.pollinators[name]) state.pollinators[name]=0;
-  state.pollinators[name]++;
-  if(!state.discoveredPollinators.has(name)){
-    state.discoveredPollinators.add(name);
-    showDiscoveryPopup(name,"pollinator");
-  }
-  buildFieldGuide();
-  updateUI();
-}
-
-// ---------- Plant Seed Normally ----------
-function plantSeed(plantName){
-  const plant = PLANTS.find(p => p.name === plantName);
-  if(!plant || state.seeds < plant.cost) return;
-
- 
-  
-// ----- Debugging / Scatter Seeds -----
-function plantSeedDebug(plantName){
-  const plant = PLANTS.find(p => p.name === plantName);
-  if(!plant) return;
-  
-  if(state.seeds < plant.cost) return;
-  state.seeds -= plant.cost;
-  if(plant.sproutMonths.includes(state.currentMonth)){
-    addPlant(plantName);
-  } else {
-    state.seedBank.push({ plantName, plantedMonth: state.currentMonth });
-  }
-
-  updateUI();
-}
-
-// ---------- Pollinator Arrival (Season-Aware) ----------
-function canPollinatorArrive(pollinator){
-  const hostPlants = pollinator.host ? [pollinator.host] : [];
-  const foodPlants = pollinator.food ? pollinator.food.split(",").map(s=>s.trim()) : [];
-
-  const hostBlooming = hostPlants.some(pName => {
-    const plant = PLANTS.find(pl => pl.name === pName);
-    return plant && state.plants[pName] > 0 && plant.bloomMonths.includes(state.currentMonth);
-  });
-
-  const foodBlooming = foodPlants.some(pName => {
-    const plant = PLANTS.find(pl => pl.name === pName);
-    return plant && state.plants[pName] > 0 && plant.bloomMonths.includes(state.currentMonth);
-  });
-
-  return hostBlooming || foodBlooming;
-}
-
-function tryPollinatorArrival(pollinatorName){
-  const pollinator = POLLINATORS.find(p => p.name === pollinatorName);
-  if(!pollinator) return;
-  if(canPollinatorArrive(pollinator)){
-    addPollinator(pollinator.name);
-  }
-}
-
-// ---------- Month Progression ----------
-function advanceMonth(){
-  state.currentMonth = (state.currentMonth + 1) % 12;
-
-  // Sprout seeds
-  const sprouting = state.seedBank.filter(s => {
-    const plant = PLANTS.find(p => p.name === s.plantName);
-    return plant && plant.sproutMonths.includes(state.currentMonth);
-  });
-
-  sprouting.forEach(s => addPlant(s.plantName));
-  state.seedBank = state.seedBank.filter(s => !sprouting.includes(s));
-
-  // Seasonal pollinator arrivals
+  // Pollinator arrival check
   POLLINATORS.forEach(p => {
-    if(!state.discoveredPollinators.has(p.name)) tryPollinatorArrival(p.name);
+    if (!state.discoveredPollinators.has(p.name)) {
+      tryPollinatorArrival(p.name);
+    }
   });
 
+  buildFieldGuide();
   updateUI();
 }
 
+// ==================== POLLINATORS ====================
 
-// ---------- Random Initial Plant ----------
-function plantRandomInitialPlant(){
-  const weightedPlants = [];
-  PLANTS.forEach(p => {
-    const weight = Math.max(1, Math.floor(50 / p.cost));
-    for(let i=0;i<weight;i++) weightedPlants.push(p);
+function canPollinatorArrive(pollinator) {
+  const lot = getActiveLot();
+  const hostPlants = pollinator.host ? [pollinator.host] : [];
+  const foodPlants = pollinator.food
+    ? pollinator.food.split(",").map(s => s.trim())
+    : [];
+
+  const hostAvailable = hostPlants.some(pName => {
+    const def = findPlantDef(pName);
+    return def && lot.plants[pName] > 0 && def.bloomMonths.includes(state.currentMonth);
   });
-  const randomPlant = weightedPlants[Math.floor(Math.random() * weightedPlants.length)];
-  addPlant(randomPlant.name);
+
+  const foodAvailable = foodPlants.some(pName => {
+    const def = findPlantDef(pName);
+    return def && lot.plants[pName] > 0 && def.bloomMonths.includes(state.currentMonth);
+  });
+
+  return hostAvailable || foodAvailable;
 }
 
-// ---------- DOM Wiring ----------
-document.addEventListener("DOMContentLoaded", () => {
-  // Scatter seeds
-  const scatterBtn = document.getElementById("scatterBtn");
-  if(scatterBtn) scatterBtn.addEventListener("click",()=>scatterSeeds(5));
+function tryPollinatorArrival(name) {
+  const lot = getActiveLot();
+  const poll = findPollinatorDef(name);
+  if (!poll) return;
 
-  // Debug plant buttons
-  const testContainer = document.getElementById("plantButtons");
-  if(testContainer){
-    PLANTS.forEach(p => {
+  if (canPollinatorArrive(poll)) {
+    if (!lot.pollinators[name]) lot.pollinators[name] = 0;
+    lot.pollinators[name]++;
 
-function scatterSeeds(numSeeds = 5){
-  state.seeds = parseInt(state.seeds,10) || 0;
-  if(state.seeds < numSeeds) return;
-
-  state.seeds -= numSeeds;
-
-  for(let i=0;i<numSeeds;i++){
-    const randomPlant = PLANTS[Math.floor(Math.random()*PLANTS.length)];
-    if(randomPlant.sproutMonths.includes(state.currentMonth)){
-      addPlant(randomPlant.name);
-    } else {
-      state.seedBank.push({ plantName: randomPlant.name, plantedMonth: state.currentMonth });
+    if (!state.discoveredPollinators.has(name)) {
+      state.discoveredPollinators.add(name);
+      showDiscoveryPopup(name, "pollinator");
     }
   }
+}
 
+// ==================== LOT MANAGEMENT ====================
+
+function switchLot(index) {
+  if (index < 0 || index >= state.lots.length) return;
+  state.activeLot = index;
+  buildFieldGuide();
   updateUI();
 }
 
-// ----- Month Progression -----
-function advanceMonth(){
-  state.currentMonth = (state.currentMonth + 1) % 12;
-
-  // Sprout seeds in seedBank
-  const sprouting = state.seedBank.filter(s => PLANTS.find(p=>p.name===s.plantName).sproutMonths.includes(state.currentMonth));
-  sprouting.forEach(s => addPlant(s.plantName));
-
-  // Remove sprouted seeds
-  state.seedBank = state.seedBank.filter(s => !sprouting.includes(s));
-
+function addLot(name, capacitySqFt) {
+  state.lots.push({
+    name: name,
+    capacitySqFt: capacitySqFt,
+    usedSqFt: 0,
+    plants: {},
+    pollinators: {},
+    seedBank: []
+  });
   updateUI();
-}
-
-// Optional: automated month progression
-function startMonthProgression(interval=3000){
-  setInterval(advanceMonth, interval);
-}
-
-
-
-// ---------- Game Initialization ----------
-window.onload = () => {
-  updateUI();              // from ui.js
-  plantRandomInitialPlant();
-  if(typeof startMonthProgression === "function") startMonthProgression(3000);
-};
-
+      }
