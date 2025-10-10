@@ -1,76 +1,106 @@
-/* Default (light) theme */
+/* --- Base styles (shared across themes) --- */
+
 body {
-  background-color: #ffffff;
-  color: #222222;
   font-family: sans-serif;
+  margin: 20px;
+  transition: background 0.3s, color 0.3s;
 }
 
-#fieldGuide {
-  position: fixed;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 500px;
-  background: var(--bg-color, #fff);
-  color: var(--text-color, #000);
-  border: 2px solid #444;
-  border-radius: 8px;
-  padding: 1rem;
-  z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-#fieldGuide.hidden {
-  display: none;
-}
-
-.closeX {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.page-controls {
-  display: flex;
-  justify-content: center;
-  gap: 1em;
-  margin-top: 1em;
-}
-
-.chapter-tabs button.active {
-  background: #4caf50;
-  color: white;
-}
-
-/* Dark mode */
-body.dark {
-  background-color: #121212;
-  color: #e0e0e0;
-}
-
-body.dark .discoveryPopup,
-body.dark .guideEntry {
-  background-color: #1f1f1f;
-  color: #e0e0e0;
-  border: 1px solid #333;
+h1, h2 {
+  margin-top: 0;
 }
 
 button {
-  padding: 0.4em 0.8em;
-  margin: 0.5em;
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin: 4px;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-/* Optional: style the dark mode toggle button differently in dark mode */
-body.dark button#darkModeToggle {
-  background-color: #333;
-  color: #e0e0e0;
-  border: 1px solid #555;
+ul {
+  list-style: none;
+  padding: 0;
 }
 
+.guide-card {
+  padding: 8px;
+  margin: 6px 0;
+  border-radius: 6px;
+}
 
+/* --- Dark Green Theme (default) --- */
+body.dark-theme {
+  background-color: #0d1f0d;
+  color: #e0f2e9;
+}
+
+body.dark-theme h1,
+body.dark-theme h2 {
+  color: #a8e6a3;
+}
+
+body.dark-theme button {
+  background: #1c3d1c;
+  color: #e0f2e9;
+  border-color: #4caf50;
+}
+body.dark-theme button:hover {
+  background: #2a5a2a;
+}
+
+body.dark-theme .guide-card {
+  border: 1px solid #4caf50;
+  background: #142814;
+  color: #c8facc;
+}
+
+/* --- Light Garden Theme --- */
+body.light-theme {
+  background-color: #f3fff3;
+  color: #223322;
+}
+
+body.light-theme h1,
+body.light-theme h2 {
+  color: #2e7d32;
+}
+
+body.light-theme button {
+  background: #c8facc;
+  color: #223322;
+  border-color: #2e7d32;
+}
+body.light-theme button:hover {
+  background: #a8e6a3;
+}
+
+body.light-theme .guide-card {
+  border: 1px solid #2e7d32;
+  background: #ffffff;
+  color: #223322;
+}
+
+/* --- Discovery popup (both themes) --- */
+#discoveryPopup {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  animation: fadeInOut 3s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translate(-50%, 20px); }
+  10%  { opacity: 1; transform: translate(-50%, 0); }
+  90%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 20px); }
+}

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roots of Renewal</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Roots of Renewal</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <script>
@@ -12,49 +11,41 @@ window.onerror = function(message, source, lineno, colno, error) {
   alert("JS Error: " + message + "\nSource: " + source + "\nLine: " + lineno);
 };
 </script>
-  <div>
-<!-- header section-->
-<p>Seeds: <span id="seedCount">0</span></p>
-<p>Plant Species: <span id="plantSpeciesCount">0</span></p>
-<p>Pollinator Species: <span id="pollinatorSpeciesCount">0</span></p>
-<p>Prestige Level: <span id="prestigeLevel">0</span></p>
-<p>Current Tier: <span id="prestigeTierName">Own Garden</span></p>
-<p>Global Impact (Species Count): <span id="globalImpactPoints">0</span></p>
-<div id="prestigeMessage"></div>
-<p>Current Month: <span id="currentMonth">April</span></p>
-
-
- <button id="prestigeBtn">Advance Restoration Tier</button>
-
-<!-- field guide-->
-    
-    <!-- Toggle Button -->
-<button id="toggleGuideBtn">📖 Open Field Guide</button>
-
-<!-- Field Guide -->
-<div id="fieldGuide" class="hidden">
-  <!-- Close X in top-right corner -->
-  <button id="closeGuideX" class="closeX">✖</button>
-
-  <h2>📖 Field Guide</h2>
-  <div class="chapter-tabs">
-    <button id="plantsTab">🌿 Plants</button>
-    <button id="pollinatorsTab">🐝 Pollinators</button>
-  </div>
-  <div id="fieldGuideContent"></div>
-  <div class="page-controls">
-    <button id="prevPage">⬅️ Prev</button>
-    <span id="pageIndicator">Page 1</span>
-    <button id="nextPage">➡️ Next</button>
-  </div>
-</div>
-
-<!--dark mode-->
-<div>
-<button id="darkModeToggle">🌙 Dark Mode</button>
-</div>
+<body class="dark-theme">
+  <h1>Roots of Renewal</h1>
+  <button id="themeToggle">Switch Theme</button>
   
+  <div id="game"></div>
 
+  <div id="monthDisplay"></div>
+
+  <h2>Lot Management</h2>
+  <div id="lotDisplay"></div>
+  <div id="lotButtons"></div>
+  <button onclick="advanceMonth()">Advance Month</button>
+  <button onclick="addLot('New Lot', 50)">Add Lot</button>
+
+  <h2>Plants</h2>
+  <ul id="plantsList"></ul>
+
+  <h2>Pollinators</h2>
+  <ul id="pollinatorsList"></ul>
+
+  <h2>Seed Bank</h2>
+  <ul id="seedBankList"></ul>
+
+  <h2>Field Guide</h2>
+  <div>
+    <button onclick="switchGuideCategory('plants')">Plants</button>
+    <button onclick="switchGuideCategory('pollinators')">Pollinators</button>
+  </div>
+  <div id="fieldGuideEntries"></div>
+  <div>
+    <button onclick="prevGuidePage()">Previous</button>
+    <button onclick="nextGuidePage()">Next</button>
+  </div>
+
+  <div id="discoveryPopup"></div>
 
   <!-- Scripts -->
   <script src="speciesData.js?v=1"></script>
@@ -62,5 +53,24 @@ window.onerror = function(message, source, lineno, colno, error) {
   <script src="prestige.js?v=1"></script>
   <script src="game.js?v=1"></script>
   <script src="ui.js?v=1"></script>
+  <script>
+    // Setup initial UI
+    document.addEventListener("DOMContentLoaded", () => {
+      const lotButtons = document.getElementById("lotButtons");
+      function renderLotButtons() {
+        lotButtons.innerHTML = "";
+        state.lots.forEach((lot, i) => {
+          const btn = document.createElement("button");
+          btn.textContent = lot.name;
+          btn.onclick = () => switchLot(i);
+          lotButtons.appendChild(btn);
+        });
+      }
+      renderLotButtons();
+
+      updateUI();
+      buildFieldGuide();
+    });
+  </script>
 </body>
 </html>

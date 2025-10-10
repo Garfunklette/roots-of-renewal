@@ -30,27 +30,31 @@ function getMonthName(index){
 
 // Handle plant growth cycles
 function handlePlantCycles(){
-  if(!state.plants) return;
-
-  Object.keys(state.plants).forEach(name => {
-    const plant = PLANTS.find(p => p.name === name);
+  Object.keys(state.plants).forEach(name=>{
+    const plant = PLANTS.find(p=>p.name===name);
     if(!plant) return;
 
-    // Sprout months: optional effects (e.g., visual)
-    if(plant.sproutMonths && plant.sproutMonths.includes(state.currentMonth)){
-      // Could trigger a sprout animation or message
+    if(plant.bloomMonths.includes(state.currentMonth)){
+      state.globalImpactPoints += state.plants[name];
     }
 
-    // Bloom months produce biodiversity points
-    if(plant.bloomMonths && plant.bloomMonths.includes(state.currentMonth)){
-      state.globalImpactPoints += state.plants[name]; // 1 pt per plant
-    }
-
-    // Seed months generate extra seeds
     if(plant.seedMonths && plant.seedMonths.includes(state.currentMonth)){
-      state.seeds += Math.ceil((state.plants[name] || 0) * 0.5);
+      state.seeds += Math.ceil(state.plants[name] * 0.5);
     }
   });
+
+  // 🌱 Sprout seeds from the seed bank
+  const sprouted = [];
+  state.seedBank.forEach((entry, idx)=>{
+    const plant = PLANTS.find(p=>p.name===entry.plantName);
+    if(plant && plant.sproutMonths.includes(state.currentMonth)){
+      addPlant(entry.plantName);
+      sprouted.push(idx);
+    }
+  });
+
+  // Remove sprouted seeds (reverse order to avoid reindexing issues)
+  sprouted.reverse().forEach(idx => state.seedBank.splice(idx,1));
 }
 
 // Handle pollinator arrival logic
