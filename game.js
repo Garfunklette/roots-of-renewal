@@ -35,6 +35,42 @@ function findPollinatorDef(name) {
   return POLLINATORS.find(p => p.name === name);
 }
 
+// Scatter multiple seeds at random
+function scatterSeeds(count) {
+  if (state.seeds < count) return;
+
+  for (let i = 0; i < count; i++) {
+    const weightedPlants = [];
+    PLANTS.forEach(plant => {
+      const weight = Math.max(1, Math.floor(50 / plant.cost));
+      for (let j = 0; j < weight; j++) weightedPlants.push(plant);
+    });
+    const randomPlant = weightedPlants[Math.floor(Math.random() * weightedPlants.length)];
+    addPlant(randomPlant.name);
+    state.seeds--;
+  }
+}
+
+// Add a pollinator to the collection
+function addPollinator(name) {
+  if (!state.pollinators[name]) state.pollinators[name] = 0;
+  state.pollinators[name]++;
+
+  if (!state.discoveredPollinators.has(name)) {
+    state.discoveredPollinators.add(name);
+    showDiscoveryPopup(name, "pollinator"); // ui.js
+  }
+
+  buildFieldGuide(); // ui.js
+  updateUI();        // ui.js
+}
+
+// Random starting plant (weighted toward low cost)
+function plantRandomInitialPlant() {
+  const weightedPlants = [];
+  PLANTS.forEach(plant => {
+    const weight = Math.max(1, Math.floor(50 / plant.cost));
+    for (let i = 0; i < weight; i++) weightedPlants.push(plant);
 // ==================== PLANTING ====================
 
 function addPlant(name) {
@@ -144,6 +180,15 @@ function canPollinatorArrive(pollinator) {
   return hostAvailable || foodAvailable;
 }
 
+// -----------------------------
+// Initialization
+// -----------------------------
+window.onload = () => {
+  updateUI();              // ui.js
+  plantRandomInitialPlant();
+
+  if (typeof startMonthProgression === "function") {
+    startMonthProgression(3000); // from time.js
 function tryPollinatorArrival(name) {
   const lot = getActiveLot();
   const poll = findPollinatorDef(name);

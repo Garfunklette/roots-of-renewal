@@ -5,6 +5,12 @@
   <title>Roots of Renewal</title>
   <link rel="stylesheet" href="style.css">
 </head>
+<body>
+  <script>
+window.onerror = function(message, source, lineno, colno, error) {
+  alert("JS Error: " + message + "\nSource: " + source + "\nLine: " + lineno);
+};
+</script>
 <body class="dark-theme">
   <h1>Roots of Renewal</h1>
   <button id="themeToggle">Switch Theme</button>
@@ -41,12 +47,12 @@
 
   <div id="discoveryPopup"></div>
 
-  <!-- Game Scripts -->
-  <script src="speciesData.js"></script>
-  <script src="game.js"></script>
-  <script src="ui.js"></script>
-  <script src="time.js"></script>
-
+  <!-- Scripts -->
+  <script src="speciesData.js?v=1"></script>
+  <script src="time.js?v=1"></script>
+  <script src="prestige.js?v=1"></script>
+  <script src="game.js?v=1"></script>
+  <script src="ui.js?v=1"></script>
   <script>
     // Setup initial UI
     document.addEventListener("DOMContentLoaded", () => {
