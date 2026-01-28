@@ -1,92 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roots of Renewal</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Roots of Renewal</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <script>
 window.onerror = function(message, source, lineno, colno, error) {
   alert("JS Error: " + message + "\nSource: " + source + "\nLine: " + lineno);
 };
-  </script>
+</script>
+<body class="dark-theme">
+  <h1>Roots of Renewal</h1>
+  <button id="themeToggle">Switch Theme</button>
+  
+  <div id="game"></div>
+
+  <div id="monthDisplay"></div>
+
+  <h2>Lot Management</h2>
+  <div id="lotDisplay"></div>
+  <div id="lotButtons"></div>
+  <button onclick="advanceMonth()">Advance Month</button>
+  <button onclick="addLot('New Lot', 50)">Add Lot</button>
+
+  <h2>Plants</h2>
+  <ul id="plantsList"></ul>
+
+  <h2>Pollinators</h2>
+  <ul id="pollinatorsList"></ul>
+
+  <h2>Seed Bank</h2>
+  <ul id="seedBankList"></ul>
+
+  <h2>Field Guide</h2>
   <div>
-  🌱 Seeds: <span id="seedCount">0</span><br>
-  🌿 Plants: <span id="plantSpeciesCount">0</span><br>
-  🐝 Pollinators: <span id="pollinatorSpeciesCount">0</span><br>
-  ⭐ Prestige: <span id="prestigeLevel">0</span> (<span id="prestigeTierName">None</span>)<br>
-  🌍 Impact: <span id="globalImpactPoints">0</span><br>
-  📅 Month: <span id="currentMonth">April</span>
-</div>
-
-<hr>
-<h3>Debug Info</h3>
-<p>Seeds: <span id="debugSeeds"></span></p>
-<ul id="debugSeedBank"></ul>
-<ul id="debugPlants"></ul>
-<ul id="debugPollinators"></ul>
-<!--scatter seeds-->
-<button id="scatterSeedsBtn">🌱 Scatter Seeds</button>
-    
-    <!--plant shop-->
-<div id="plantShop">
-  <h3>🌱 Plant Shop</h3>
-  <div id="plantButtons"></div>
-    
-    <!-- Debug UI -->
-<div id="debugSection" style="border:1px solid #aaa; padding:5px; margin:5px; font-size:0.9em;">
-  <h3>🌱 Debug Info</h3>
-  <p>Seeds: <span id="debugSeeds">0</span></p>
-  
-  <p>Seed Bank:</p>
-  <ul id="debugSeedBank"></ul>
-
-  <p>Plants:</p>
-  <ul id="debugPlants"></ul>
-
-  <p>Pollinators:</p>
-  <ul id="debugPollinators"></ul>
-</div>
-
-    <!-- Prestige-->
-    <button id="prestigeBtn">Advance Restoration Tier</button>
-<!-- field guide-->
-    
-    <!-- Toggle Button -->
-<button id="toggleGuideBtn">📖 Open Field Guide</button>
-
-<!-- Field Guide -->
-<div id="fieldGuide" class="hidden">
-  <!-- Close X in top-right corner -->
-  <button id="closeGuideX" class="closeX">✖</button>
-
-  <h2>📖 Field Guide</h2>
-  <div class="chapter-tabs">
-    <button id="plantsTab">🌿 Plants</button>
-    <button id="pollinatorsTab">🐝 Pollinators</button>
+    <button onclick="switchGuideCategory('plants')">Plants</button>
+    <button onclick="switchGuideCategory('pollinators')">Pollinators</button>
   </div>
-  <div id="fieldGuideContent"></div>
-  <div class="page-controls">
-    <button id="prevPage">⬅️ Prev</button>
-    <span id="pageIndicator">Page 1</span>
-    <button id="nextPage">➡️ Next</button>
+  <div id="fieldGuideEntries"></div>
+  <div>
+    <button onclick="prevGuidePage()">Previous</button>
+    <button onclick="nextGuidePage()">Next</button>
   </div>
-</div>
 
-<!--dark mode-->
-<div>
-<button id="darkModeToggle">🌙 Dark Mode</button>
-</div>
-  
-
+  <div id="discoveryPopup"></div>
 
   <!-- Scripts -->
-  <script src="speciesData.js"></script>
-  <script src="time.js"></script>
-  <script src="prestige.js"></script>
-  <script src="game.js"></script>
-  <script src="ui.js"></script>
+  <script src="speciesData.js?v=1"></script>
+  <script src="time.js?v=1"></script>
+  <script src="prestige.js?v=1"></script>
+  <script src="game.js?v=1"></script>
+  <script src="ui.js?v=1"></script>
+  <script>
+    // Setup initial UI
+    document.addEventListener("DOMContentLoaded", () => {
+      const lotButtons = document.getElementById("lotButtons");
+      function renderLotButtons() {
+        lotButtons.innerHTML = "";
+        state.lots.forEach((lot, i) => {
+          const btn = document.createElement("button");
+          btn.textContent = lot.name;
+          btn.onclick = () => switchLot(i);
+          lotButtons.appendChild(btn);
+        });
+      }
+      renderLotButtons();
+
+      updateUI();
+      buildFieldGuide();
+    });
+  </script>
 </body>
 </html>
